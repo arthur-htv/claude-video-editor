@@ -243,6 +243,8 @@ claude-video-editor/
 
 This folder is public at https://github.com/arthur-htv/claude-video-editor.
 
+**License:** the setup, the `video-editor`, `captions`, `kinetic-text` and `morph-shapes` skills and this guide are MIT (see `LICENSE`). The bundled Herk Edit Kit, HyperFrames skills and fonts keep their own licenses, listed in `licenses/` and the skill folders.
+
 The `.gitignore` already keeps the big and personal things out of git: `tools/`, `.venv/`, `node_modules/`, `work/`, `video-projects/`, `.env`, and the contents of `input/` and `output/`. Only the setup scripts, the guides, the skills and the style library get shared, about 2.5 MB. Anyone who clones the folder runs the setup once (Step 3) and has the same editor.
 
 Before you push changes, run `git status` and check that no video, API key or `.env` file is listed.
@@ -294,5 +296,5 @@ Delete the folder. Two things HyperFrames keeps outside the folder, which you ca
   - Kinetic text has a dark halo, so it reads on white clothing.
   - `build_morph.py --help` works.
 
-  Published on GitHub (public).
+  Published on GitHub (public) under the MIT license.
 - **2026-10-30:** First version. Windows and macOS / Linux setup with portable tools, the `video-editor` skill, dead-air cutter with gentle / normal / tight presets, captions, HyperFrames titles, tested FFmpeg recipes.
