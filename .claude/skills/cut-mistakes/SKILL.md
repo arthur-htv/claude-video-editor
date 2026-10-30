@@ -28,7 +28,9 @@ Input is normally Agent 1's `<stem>.silence-transcript.json`, so cuts land on th
 - `<stem>.cut-candidates.json` — structured candidates (type, confidence, proposed `cut` range, `removes`/`keeps` text, context, recommendation)
 - `<stem>.cut-candidates.md` — readable proposal
 
-Candidate types: `stutter` (immediate word repeat), `retake` (duplicate/near-duplicate segment via Jaccard similarity), `false_start` (short abandoned phrase that restarts).
+Candidate types: `stutter` (immediate word repeat), `repeat` (a 2-6 word phrase said twice in a row, such as "the biggest mistake is, the biggest mistake is"; added for this folder), `retake` (duplicate/near-duplicate segment via Jaccard similarity), `false_start` (short abandoned phrase that restarts).
+
+In this folder you can skip the `video-projects/` setup: the local transcript from `transcribe.py --json work/<name>.transcript.json` works as the input, with `--out-dir work`. See step 4 of `.claude/skills/video-editor/references/auto-edit.md`.
 
 ### 2. Review (the gate — REQUIRED)
 

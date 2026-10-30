@@ -82,6 +82,30 @@ for (let i = 1; i < words.length; i++) {
   }
 }
 
+// ---- 1b) repeated phrases [claude-video-editor patch] ----
+// "the biggest mistake is, the biggest mistake is": a restart inside one breath. Segments only split at
+// long pauses (and dead-air cutting removes those), so the retake check below never sees these.
+for (let i = 0; i < words.length; i++) {
+  for (let n = 6; n >= 2; n--) {
+    if (i + 2 * n > words.length) continue;
+    const a = words.slice(i, i + n), b = words.slice(i + n, i + 2 * n);
+    if (!a.every((w, k) => w.token && w.token === b[k].token) || b[0].start - a[n - 1].end > 1.0) continue;
+    candidates.push({
+      id: `c${String(++cid).padStart(3, "0")}`,
+      type: "repeat",
+      confidence: n >= 3 ? "high" : "medium",
+      recommend: n >= 3 ? "cut" : "review",
+      cut: { start: Number(a[0].start.toFixed(3)), end: Number(b[0].start.toFixed(3)) },
+      removes: displayText(a),
+      keeps: displayText(b),
+      context: ctx(i + n, n + 4, n + 6),
+      note: `${n}-word phrase said twice`,
+    });
+    i += n - 1; // continue after the first copy
+    break;
+  }
+}
+
 // ---- build segments (for retake / false-start detection) ----
 const segments = [];
 let segStart = 0;

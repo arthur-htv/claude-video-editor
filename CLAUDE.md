@@ -20,8 +20,11 @@ This folder turns Claude Code into a video editor. Raw videos go in `input/`, fi
 
 ## Which skill to use
 
+One keyword is enough to choose a skill ("captions", "highlights", "chart", "retakes"). The full keyword map and the order steps run in are in the `video-editor` skill.
+
 | Request | Skill |
 |---|---|
+| "auto", "do everything", "make it engaging", `/video-editor:auto` | `video-editor` automatic edit (`references/auto-edit.md`): scans each video and picks the effects itself |
 | Cut dead air, trim, join, reframe, compress, music, general edits | `video-editor` (start here when unsure) |
 | Captions / subtitles | `captions` |
 | Kinetic text on the emphasized words | `kinetic-text` |

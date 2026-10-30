@@ -92,6 +92,32 @@ Claude uses the `video-editor` skill. You can also call it directly by typing `/
 
 Long videos take a while: rendering runs at roughly real-time speed or faster for 1080p, slower for 4K.
 
+**Let Claude pick the effects (automatic edit).** Type `/video-editor:auto` (or say "auto edit", "do everything", "make it engaging"). For each video, Claude:
+
+1. cuts the dead air
+2. transcribes it and reads what you say
+3. cuts repeated phrases and retakes
+4. turns the numbers you mention into morphing charts (bar chart for a comparison, counting ring for a percentage, check / X for a verdict)
+5. puts kinetic text on the words you stress
+6. adds captions last, keeping them off the graphics
+
+It then checks the frames and reports what it added and where. Add notes after the command, e.g. `/video-editor:auto talk.mov no captions` or `/video-editor:auto keywords: Claude, 10x`.
+
+How much it adds depends on the video:
+- **Vertical or under 90 s:** tight cuts and reel captions.
+- **Long horizontal videos:** fewer graphics, plus clean subtitles and an `.srt` file.
+
+It never invents a number: no numbers spoken means no charts.
+
+**Or just name the effects.** One keyword is enough, and Claude runs them in the right order:
+- "captions"
+- "highlights" or "pop" for kinetic text
+- "chart the numbers"
+- "remove the retakes"
+- "captions and highlights"
+
+Each step takes time. On a 30-second test clip, rendering took about 2 minutes, and the whole automatic edit (with Claude reading, deciding and checking frames) took about 8 minutes.
+
 ### Step 6: Get your finished videos
 
 Finished videos are in `output/`, with the same name as the original (`input/talk.mov` becomes `output/talk.mp4`). They are H.264 MP4 files that play and upload everywhere. iPhone HDR footage stays HDR (HEVC 10-bit).
@@ -134,7 +160,8 @@ Claude picks the right skill from what you ask. You can also call one by name (t
 
 | Skill | Use it for | Try saying |
 |---|---|---|
-| `video-editor` | Cutting dead air, plus everyday edits: trim, join, vertical, music, logo, compress | "edit my videos", "make it tighter" |
+| `/video-editor:auto` | The automatic edit: scans each video and adds what fits (dead-air cut, retake cuts, morph charts, kinetic text, captions) | "auto edit", "do everything", "make it engaging" |
+| `video-editor` | Cutting dead air, plus everyday edits: trim, join, vertical, music, logo, compress. Also turns single keywords ("captions", "highlights", "chart") into the right skills. | "edit my videos", "make it tighter" |
 | `captions` | Burned-in captions in the playbook's reel style (1-3 words, dark box, colored keywords, never over the mouth), one-word captions, or clean subtitles + `.srt` | "add captions", "subtitles for YouTube" |
 | `kinetic-text` | Animated text only on the words you stress, numbers and names (pop, slam, typewriter, highlight, stack), spaced out so there's no clutter | "make the key points pop", "add kinetic typing on the important words" |
 | `morph-shapes` | A circle that becomes a bar chart, donut, line chart, check / X, or counting ring | "show 6 hours vs 1 hour as a chart at 0:12", "add a checkmark when I say approved" |
@@ -149,6 +176,8 @@ Claude picks the right skill from what you ask. You can also call one by name (t
 How Nate's videos are edited with these skills (the order, the numbers, the caption and B-roll rules, the lessons) is in **[docs/EDITING-PLAYBOOK.md](docs/EDITING-PLAYBOOK.md)**. The motion vocabulary is in **[MOTION_PHILOSOPHY.md](MOTION_PHILOSOPHY.md)**, the card library rules in **[style-library/GUIDE.md](style-library/GUIDE.md)**, and the kit's own workspace guide in **[AGENTS.md](AGENTS.md)**. Step-by-step kit workflows: [docs/WORKFLOW.md](docs/WORKFLOW.md), [docs/SHORT-FORM.md](docs/SHORT-FORM.md), [docs/PROMPTS.md](docs/PROMPTS.md).
 
 ### A full edit, in order
+
+`/video-editor:auto` does all of this by itself. To steer each step yourself:
 
 1. "Cut the dead air" (`video-editor`), or for a reel "use short-form-edit".
 2. "Show me the retakes and stutters to cut" (`cut-mistakes`). You approve each cut.
@@ -222,8 +251,9 @@ claude-video-editor/
 ├── .claude/
 │   ├── settings.json      runs the start-up check
 │   ├── hooks/session-start.sh
+│   ├── commands/video-editor/auto.md   the /video-editor:auto command
 │   └── skills/
-│       ├── video-editor/  dead air + everyday edits (scripts, recipes, fonts)
+│       ├── video-editor/  dead air, everyday edits, keyword map and the automatic edit (references/auto-edit.md)
 │       ├── captions/, kinetic-text/, morph-shapes/
 │       └── edit-video/, short-form-edit/, cut-silences/, cut-mistakes/, ... (Herk Edit Kit)
 ├── video-projects/        Herk Edit Kit working folders (created when used)
@@ -277,6 +307,16 @@ Delete the folder. Two things HyperFrames keeps outside the folder, which you ca
 
 ## Changelog
 
+- **2026-10-30 (automatic edit):**
+  - New `/video-editor:auto` command and "auto" keyword. Claude profiles each video (short, medium or long) and then runs the whole chain itself: dead air, retakes, morph charts where numbers are said, kinetic text, captions.
+  - The `video-editor` skill maps single keywords ("captions", "highlights", "chart", "retakes") to the right skills and always runs them in the right order.
+  - `make_captions.py --hide-during` keeps captions off graphics.
+  - The retake finder now also catches a phrase said twice in a row, with a new test (`npm test`: 12 of 12 pass).
+  - Fixes from a test run by a fresh agent:
+    - Numbers stay whole ("1,000", "87%", "3.5x") in transcripts and captions.
+    - The check / X label sits in a dark box.
+    - Kinetic-text keywords can be phrases ("phone is enough").
+    - Clearer rules for how far apart graphics go and how long a cutaway lasts.
 - **2026-10-30 (update):** Added the Herk Edit Kit:
   - its 14 skills, tools and style library
   - its playbook, motion philosophy and library guide

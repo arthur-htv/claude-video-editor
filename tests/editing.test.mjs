@@ -61,3 +61,14 @@ test('beat validator accepts reordered attributes and enforces early and late li
     assert.equal(JSON.parse(result.stdout).rows.length, 1);
   }
 });
+
+// [claude-video-editor patch] a phrase restarted inside one breath is proposed as a cut of the first copy
+test('a phrase said twice in a row is proposed as a repeat cut', () => {
+  const out = scratch(), src = join(out, 'talk.transcript.json');
+  const said = 'The biggest mistake is, the biggest mistake is waiting too long.'.split(' ');
+  writeFileSync(src, JSON.stringify({ words: said.map((text, i) => ({ text, start: i * 0.4, end: i * 0.4 + 0.3, type: 'word' })) }));
+  const result = run('.claude/skills/cut-mistakes/scripts/find-cut-candidates.mjs', [src, '--out-dir', out]);
+  assert.equal(result.status, 0, result.stderr);
+  const [c] = JSON.parse(readFileSync(join(out, 'talk.cut-candidates.json'))).candidates.filter(c => c.type === 'repeat');
+  assert.deepEqual([c.cut.start, c.cut.end, c.removes, c.recommend], [0, 1.6, 'The biggest mistake is,', 'cut']);
+});

@@ -57,11 +57,25 @@ def word_loudness(video: Path, words: list[dict]) -> np.ndarray:
     return np.array(out)
 
 
+def keyword_runs(words: list[dict], keywords: list[str]) -> dict[int, tuple[int, int]]:
+    """Where a multi-word keyword ("phone is enough") is said: every word index in it -> (first, last) index."""
+    toks = [norm(w["word"]) for w in words]
+    runs = {}
+    for k in keywords:
+        t = [norm(x) for x in k.split()]
+        if len(t) > 1:
+            for j in range(len(toks) - len(t) + 1):
+                if toks[j:j + len(t)] == t:
+                    runs.update({m: (j, j + len(t) - 1) for m in range(j, j + len(t))})
+    return runs
+
+
 def score_words(words: list[dict], loud: np.ndarray, keywords: list[str]) -> list[dict]:
     starts = np.array([w["start"] for w in words])
     per_char = np.array([(w["end"] - w["start"]) / max(1, len(norm(w["word"]))) for w in words])
     med_rate = float(np.median(per_char)) if len(per_char) else 0.07
     kw = [k.strip().lower() for k in keywords if k.strip()]
+    in_phrase = keyword_runs(words, kw)
     scored = []
     for i, w in enumerate(words):
         n = norm(w["word"])
@@ -90,7 +104,7 @@ def score_words(words: list[dict], loud: np.ndarray, keywords: list[str]) -> lis
         if w["word"][:1].isupper() and n != "i" and not prev.endswith((".", "?", "!")):
             s += 2.0
             reasons.append("name")
-        if any(n == k or (len(k) > 3 and k in w["word"].lower()) for k in kw):
+        if i in in_phrase or any(n == k or (len(k) > 3 and k in w["word"].lower()) for k in kw):
             s += 6.0
             reasons.append("your keyword")
         scored.append({"i": i, "score": s, "reasons": reasons})
@@ -163,13 +177,15 @@ def main() -> int:
         return 1
 
     loud = word_loudness(video, words)
-    scored = sorted(score_words(words, loud, args.keywords.split(",")), key=lambda x: -x["score"])
+    keywords = [k.strip().lower() for k in args.keywords.split(",") if k.strip()]
+    scored = sorted(score_words(words, loud, keywords), key=lambda x: -x["score"])
+    runs = keyword_runs(words, keywords)
     limit = args.max or max(3, round(info.duration / 12))
     candidates, used = [], set()
     for s in scored:
         if s["score"] < 2.5 or s["i"] in used:
             continue
-        lo, hi = build_phrase(words, s["i"])
+        lo, hi = runs.get(s["i"]) or build_phrase(words, s["i"])   # a keyword phrase stays whole
         if any(k in used for k in range(lo, hi + 1)):
             continue
         used.update(range(lo, hi + 1))

@@ -1,11 +1,42 @@
 ---
 name: video-editor
-description: Edit the user's videos in this folder. Raw footage is read from input/ and finished videos are written to output/. The main job is cutting dead air (silent pauses at the start, between sentences and at the end); it also trims, joins, reframes for TikTok/Reels/Shorts, adds captions, music, titles and other edits with FFmpeg, Python and HyperFrames. Use this skill whenever the user wants anything done to a video or recording, such as "edit my videos", "remove the silences / pauses / dead air", "make it tighter", "clean up this recording", "jump cuts", "trim the start", "add subtitles", "make a vertical version", or "process what's in input", even if they don't name a file or say "skill".
+description: Edit the user's videos in this folder. Raw footage is read from input/ and finished videos are written to output/. The main job is cutting dead air (silent pauses at the start, between sentences and at the end); it also trims, joins, reframes for TikTok/Reels/Shorts, adds captions, music, titles and other edits with FFmpeg, Python and HyperFrames. Use this skill whenever the user wants anything done to a video or recording, such as "edit my videos", "remove the silences / pauses / dead air", "make it tighter", "clean up this recording", "jump cuts", "trim the start", "add subtitles", "make a vertical version", or "process what's in input", even if they don't name a file or say "skill". It also runs the automatic edit ("auto", "auto edit", "do everything", "full edit", "make it engaging", "add effects", /video-editor:auto) that scans each video and adds retake cuts, kinetic text, morph charts and captions by itself. A single keyword such as "captions", "highlights", "pop", "chart", "numbers" or "retakes" is enough to bring in the matching skill.
 ---
 
 # Video editor
 
 You are the editor. The user drops raw footage into `input/`; you deliver finished videos in `output/`. Unless they ask for something else, "edit my videos" means: cut the dead air out of every video in `input/`.
+
+## Keywords choose the skills
+
+Users often name the effects they want in a word or two, so map their words to skills yourself. One keyword is enough, and several combine. Any arguments typed after `/video-editor` (they arrive as `ARGUMENTS: ...`) count as keywords too.
+
+| The user says (any wording) | Run |
+|---|---|
+| **auto**, auto edit, do everything, full edit, make it engaging, add effects, "edit it for me" | the automatic edit: follow `references/auto-edit.md` (also `/video-editor:auto`). It scans each video and picks every effect below by itself. |
+| dead air, silences, pauses, tighten, jump cuts | dead-air cut (this skill, below) |
+| mistakes, retakes, stutters, flubs, repeats | `cut-mistakes` (step 4 of `references/auto-edit.md` shows the local commands) |
+| pop, emphasis, highlights, kinetic, text effects, typing, key words | `kinetic-text` |
+| chart, graph, stats, numbers, morph, shapes, check / X, visualize | `morph-shapes` |
+| captions, subtitles, subs, words on screen, srt | `captions` |
+| reel, short, TikTok, vertical, 9:16 | a quick crop: the reframe recipe in `references/editing-recipes.md`. A designed short: `short-form-edit`. |
+| story, beats, glass cards, style library, Herk edit | Herk Edit Kit: `edit-video`, `video-storytelling`, `style-library` (see `CLAUDE.md` and `docs/EDITING-PLAYBOOK.md`) |
+
+Whatever the user picks runs in this fixed order. Each step writes to `work/`, and only the last writes to `output/`:
+
+1. dead air
+2. mistakes
+3. morph graphics and kinetic text: choose the graphics first, then keep the kinetic text clear of them
+4. captions, always last
+
+Captions go last so their timing matches the final cut and they sit on top. When graphics are in the video, pass their time windows to `--hide-during` so captions don't cover them. Dead air is cut first by default because it's this folder's main job; skip it when the user says the video is already edited.
+
+Examples:
+- "captions and highlights" → dead air → kinetic text → captions
+- "chart the numbers" → dead air → morph graphics
+- "auto" → everything, chosen per video
+
+For anything besides dead air, the decision rules in `references/auto-edit.md` (which template fits which sentence, timing, density, collisions) apply too.
 
 ## The folder contract
 
@@ -70,16 +101,6 @@ In the commands below, `PY` is the project's Python: `.venv/Scripts/python.exe` 
 Fine-tune with `--min-silence SEC`, `--padding SEC` and `--threshold DB`, e.g. `--preset tight --padding 0.12`. Map the user's words onto these. "Too choppy" or "words cut off" means more padding or `gentle`. "Still slow" or "more energy" means `tight`. Re-run with `--overwrite` to replace a finished file. Other flags: `--suffix _cut` (keeps both versions), `--output-dir work` (for chaining), `--crf` (quality, default 18), `--speed` (encoder preset, default `fast`), `--json`.
 
 What the script handles on its own, so you don't need to: the threshold adapts to each recording's own noise floor (quiet room or noisy room); word endings and quiet consonant releases are kept; tiny clicks don't count as speech; every join gets a few ms of audio fade so there are no pops; iPhone HDR footage stays HDR (HEVC 10-bit); odd frame sizes are fixed; audio-only files (`.mp3`, `.wav`, `.m4a`) come out in their own format; files without an audio track are skipped with a reason.
-
-## Dedicated skills for bigger jobs
-
-Hand off to these when the request matches. They follow the same input / work / output contract:
-- **`captions`**: burned-in reel captions (playbook style), minimal one-word captions, or clean subtitles plus `.srt`.
-- **`kinetic-text`**: kinetic typography only on the emphasized words, numbers and names, spaced out so it never clutters.
-- **`morph-shapes`**: a circle that becomes a bar chart, donut, line chart, check / X, or counting ring. Use it as a cutaway or overlay at the moment the speaker says the number.
-- **Herk Edit Kit:** `edit-video` (full edit), `short-form-edit` (reels), `cut-mistakes` (retakes and stutters), `video-storytelling`, `style-library`, `motion-showreel`, and the others listed in `CLAUDE.md`. `docs/EDITING-PLAYBOOK.md` explains how they're used together.
-
-A typical full edit chains them: cut dead air → mistakes → kinetic text / morph graphics → captions last. Each step writes to `work/`, and only the last one writes to `output/`.
 
 ## Other edits
 

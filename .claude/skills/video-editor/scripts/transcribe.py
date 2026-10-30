@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import warnings
 from pathlib import Path
@@ -77,7 +78,18 @@ def transcribe_words(src: Path, model_name: str = "small", language: str | None 
     segments, info = model.transcribe(str(src), language=language, vad_filter=True, word_timestamps=True)
     words = [{"start": round(w.start, 3), "end": round(w.end, 3), "word": w.word.strip()}
              for seg in segments for w in (seg.words or []) if w.word.strip()]
-    return words, info
+    return join_number_parts(words), info
+
+
+def join_number_parts(words: list[dict]) -> list[dict]:
+    """Whisper splits "1,000" into "1" + ",000" and "87%" into "87" + "%". Glue them back into one word."""
+    out: list[dict] = []
+    for w in words:
+        if out and out[-1]["word"][-1:].isdigit() and re.match(r"(?:[,.]\d|%)", w["word"]):
+            out[-1] = {**out[-1], "word": out[-1]["word"] + w["word"], "end": w["end"]}
+        else:
+            out.append(w)
+    return out
 
 
 def load_words(path: Path) -> list[dict]:
@@ -93,7 +105,7 @@ def load_words(path: Path) -> list[dict]:
         text = (w.get("word") or w.get("text") or "").strip()
         if text:
             words.append({"start": float(w["start"]), "end": float(w["end"]), "word": text})
-    return words
+    return join_number_parts(words)
 
 
 def kit_transcript(words: list[dict], duration: float | None = None) -> dict:

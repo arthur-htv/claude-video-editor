@@ -200,7 +200,7 @@ def build(spec: dict, w: int, h: int, box: tuple[float, float, float, float], ba
         svg.append(f'<path class="glyph" d="{circle_path}" fill="#fff"/>')
         svg.append(f'<path id="target" d="{shape}" style="display:none"/>')
         if spec.get("label"):
-            divs.append(label_div("title2", cx, cy + R + unit * 0.12, html.escape(spec["label"]), unit * 0.07))
+            divs.append(label_div("title2", cx, cy + R + unit * 0.14, html.escape(spec["label"]), unit * 0.095))
             js.append('tl.from(".title2",{y:16,opacity:0,duration:0.35,ease:"power2.out"},1.0);')
         # fast: the circle is up by 0.3 s and the symbol is complete at ~0.75 s, so it lands on the word
         js.append('gsap.set(".disk,.glyph,.ring",{transformOrigin:"50% 50%"});'
@@ -276,6 +276,7 @@ svg{{position:absolute;inset:0}}
 .grid{{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px {unit * 0.09:.0f}px),repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 1px,transparent 1px {unit * 0.09:.0f}px)}}
 .vig{{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 35%,#000 100%)}}
 .title,.title2,.val,.lab,.leg,.big{{position:absolute;white-space:nowrap;font-family:'Montserrat XB';font-weight:800;line-height:1}}
+.title2{{background:rgba(12,14,18,.9);padding:.3em .6em;border-radius:.2em;box-shadow:0 0 0 .07em rgba(255,255,255,.85)}}
 .dot{{display:inline-block;width:.7em;height:.7em;border-radius:50%;margin-right:.4em;vertical-align:middle}}
 </style></head><body>
 <div id="root" data-composition-id="main" data-start="0" data-duration="{dur}" data-width="{w}" data-height="{h}">

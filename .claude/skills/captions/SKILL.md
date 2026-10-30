@@ -32,6 +32,7 @@ Raw footage is in `input/`, finished videos go to `output/`, scratch goes to `wo
 | One word at a time, smaller (raw-reel look) | `--style minimal` |
 | Sentence subtitles for long-form / YouTube | `--style clean` |
 | Also a subtitle file to upload | `--srt` |
+| Keep captions off graphics (morph charts, cards) | `--hide-during "2.9-5.9,8.2-10.8"` (seconds the graphics are on screen). Captions running into a window are shortened, not dropped, and the check sheet adds frames around each window. Pass it to both the plan and the burn. |
 | Move them | `--position top` / `middle` / `bottom` / `0.7` (fraction of the height) |
 | Bigger or smaller | `--scale 1.2` |
 | No colors or no serif accents | `--no-color`, `--no-serif` |

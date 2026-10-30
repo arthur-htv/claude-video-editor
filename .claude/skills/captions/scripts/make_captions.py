@@ -61,7 +61,8 @@ NUMBER = re.compile(r"^[$€£]?\d[\d,.]*(%|x|k|m|b)?$|^\d+(st|nd|rd|th)$", re.I
 def clean_word(word: str, caps: bool) -> str:
     w = word.strip()
     if caps:
-        w = re.sub(r"[.,;:…\"“”]+", "", w).upper()   # keep ? ! ' % $ in caps style
+        # keep ? ! ' % $ in caps style, and the , or . inside numbers (1,000 and 3.5x)
+        w = re.sub(r"(?<!\d)[.,]|[.,](?!\d)|[;:…\"“”]+", "", w).upper()
     return w
 
 
@@ -296,6 +297,26 @@ def burn(video: Path, plan: dict, out: Path, crf: int, speed: str) -> None:
         os.chdir(cwd)
 
 
+def windows(spec: str) -> list[tuple[float, float]]:
+    """'2.9-5.9,8.2-10.8' -> [(2.9, 5.9), (8.2, 10.8)]"""
+    return [tuple(float(x) for x in w.split("-")) for w in spec.split(",") if w.strip()]
+
+
+def hide_during(chunks: list[dict], spec: str, min_len: float = 0.25) -> list[dict]:
+    """Keep captions off the screen during 'start-end' windows (e.g. while a chart is shown).
+    A caption that runs into a window is shortened to end at its edge, so a line said right before or after
+    a graphic still shows; only what would be left shorter than min_len seconds is dropped."""
+    out = []
+    for c in chunks:
+        s, e = c["start"], c["end"]
+        for a, b in windows(spec):
+            if s < b and e > a:
+                s, e = (s, min(e, a)) if s < a else (max(s, b), e)
+        if e - s >= min_len:
+            out.append({**c, "start": round(s, 3), "end": round(e, 3)})
+    return out
+
+
 def main() -> int:
     try:
         sys.stdout.reconfigure(errors="replace")
@@ -314,6 +335,8 @@ def main() -> int:
     p.add_argument("--plan-only", action="store_true", help="write the caption plan to work/ and stop")
     p.add_argument("--from-plan", type=Path, help="render an edited plan instead of planning again")
     p.add_argument("--out", type=Path, help="output video (default: output/<name>.mp4)")
+    p.add_argument("--hide-during", default="", metavar="WINDOWS",
+                   help="no captions in these windows, e.g. \"2.9-5.9,8.2-10.8\" (while morph graphics are on screen)")
     p.add_argument("--srt", action="store_true", help="also write the captions as an .srt next to the output")
     p.add_argument("--overwrite", action="store_true")
     p.add_argument("--crf", type=int, default=18)
@@ -338,6 +361,7 @@ def main() -> int:
 
     if args.from_plan:
         plan = json.loads(args.from_plan.read_text(encoding="utf-8"))
+        plan["chunks"] = hide_during(plan["chunks"], args.hide_during)
     else:
         from transcribe import load_words, transcribe_words
         if args.words:
@@ -356,8 +380,8 @@ def main() -> int:
             pos = float(args.position)
         plan = {"source": str(video), "style": args.style, "width": info.width, "height": info.height,
                 "fps": info.fps or 30, "position": round(pos, 3), "scale": args.scale, "layout_note": lay.note,
-                "chunks": plan_captions(words, args.style, info.fps or 30, lay.vertical,
-                                        not args.no_color, not args.no_serif)}
+                "chunks": hide_during(plan_captions(words, args.style, info.fps or 30, lay.vertical,
+                                                    not args.no_color, not args.no_serif), args.hide_during)}
         plan_path.parent.mkdir(parents=True, exist_ok=True)
         plan_path.write_text(json.dumps(plan, indent=1), encoding="utf-8")
         colored = sum(c["color"] != "white" for c in plan["chunks"])
@@ -384,8 +408,10 @@ def main() -> int:
     from hfbuild import contact_sheet
     chunks = plan["chunks"]
     picks = [chunks[i] for i in sorted({round(k * (len(chunks) - 1) / 5) for k in range(6)})] if chunks else []
-    sheet = contact_sheet(out, [(c["start"] + c["end"]) / 2 for c in picks],
-                          root / "work" / f"{stem}.captions-check.png")
+    times = [(c["start"] + c["end"]) / 2 for c in picks]
+    for a, b in windows(args.hide_during):   # also just before, during and just after each graphic
+        times += [max(0.0, a - 0.3), (a + b) / 2, min(res.duration - 0.05, b + 0.4)]
+    sheet = contact_sheet(out, sorted(times), root / "work" / f"{stem}.captions-check.png")
     print(f"OK  {out}  ({len(chunks)} captions, {fmt_time(res.duration)})")
     print(f"Check frames: {sheet}")
     return 0
