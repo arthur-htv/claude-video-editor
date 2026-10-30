@@ -1,0 +1,28 @@
+# Created by setup on each machine (never commit these)
+tools/
+.venv/
+node_modules/
+
+# Your videos stay on your machine
+input/*
+!input/.gitkeep
+output/*
+!output/.gitkeep
+work/
+
+# Herk Edit Kit workspaces and keys (personal footage, transcripts, renders, API keys)
+video-projects/
+raw-media/
+tmp/
+.env
+
+# Personal Claude Code settings
+.claude/settings.local.json
+
+# Python and OS clutter
+__pycache__/
+*.pyc
+.ruff_cache/
+.DS_Store
+Thumbs.db
+desktop.ini
