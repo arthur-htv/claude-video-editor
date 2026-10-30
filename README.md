@@ -98,8 +98,14 @@ Long videos take a while: rendering runs at roughly real-time speed or faster fo
 2. transcribes it and reads what you say
 3. cuts repeated phrases and retakes
 4. turns the numbers you mention into morphing charts (bar chart for a comparison, counting ring for a percentage, check / X for a verdict)
-5. puts kinetic text on the words you stress
-6. adds captions last, keeping them off the graphics
+5. adds templates where they fit:
+   - a flowchart explainer that builds itself while you walk through a process
+   - numbered steps for tips
+   - a comparison for this vs that
+   - a hook title at the start
+   - a save / follow card at the end
+6. puts kinetic text on the words you stress
+7. adds captions last, keeping them off the graphics
 
 It then checks the frames and reports what it added and where. Add notes after the command, e.g. `/video-editor:auto talk.mov no captions` or `/video-editor:auto keywords: Claude, 10x`.
 
@@ -165,6 +171,11 @@ Claude picks the right skill from what you ask. You can also call one by name (t
 | `captions` | Burned-in captions in the playbook's reel style (1-3 words, dark box, colored keywords, never over the mouth), one-word captions, or clean subtitles + `.srt` | "add captions", "subtitles for YouTube" |
 | `kinetic-text` | Animated text only on the words you stress, numbers and names (pop, slam, typewriter, highlight, stack), spaced out so there's no clutter | "make the key points pop", "add kinetic typing on the important words" |
 | `morph-shapes` | A circle that becomes a bar chart, donut, line chart, check / X, or counting ring | "show 6 hours vs 1 hour as a chart at 0:12", "add a checkmark when I say approved" |
+| `motion-templates` | A template library in 4 themes: **blueprint** (dark graph paper, glowing blue, handwriting), **midnight** (black, bold, teal), **paper** (light, serif) and **apple** (black, Inter, blue accent, glass panels). It has 12 templates: a flowchart explainer (boxes appear as you explain, the camera follows, then zooms out to the whole map), steps, compare, quote, chapter, hook title, label tags, a save / follow end card, `card` for cards designed by hand, and three adapted from HeyGen's free HyperFrames library: lower thirds (a clean name bar and three bare styles), calm Apple-like title cards, and hand-drawn circles and underlines. | "make a flowchart of the steps", "add a hook title and a save card", "put my name and title on screen", "circle the card in my hand", "use the paper theme" |
+| `talking-head-recut` | The director's pass. Claude reads what you say, plans a graphic for each moment worth one (a stat, key points, a term, a payoff, a full-screen statement), timed to the word, shows you the plan, then designs each card and renders it over your untouched video. Apple-style look built in. It is the graphics step of `/video-editor:auto`. Adapted from HeyGen's retired HyperFrames skill of the same name. | "direct the edit", "Apple-style clean graphics", "design cards for the key points", "the templates look generic" |
+| `text-behind` | One big word or number placed behind you, with you cut out in front of it. Runs locally (HyperFrames background removal, free model). Slow, so 1 or 2 short moments per video. | "put 90 DAYS behind me", "text behind my head" |
+| `cut-the-curve` | Exact timing and easing numbers for every animation (card entrances, hook titles, pop-up words, camera moves, payoffs), so "Apple-smooth" looks the same everywhere. Adapted from HeyGen's HyperFrames skill of the same name. | "make it smoother", "too bouncy", "feels cheap", "Apple-like motion" |
+| `sound-effects` | Free sound effects on your graphics: a whoosh when a card enters, a pop when a number lands, a soft click per list line, one bass hit on the big statement. Each lands one frame after its picture, sits under your voice, and never repeats the exact same take. Uses the free Pixabay sounds that come with HyperFrames; nothing is uploaded. | "add sound effects", "make it punchier", "add whooshes" |
 | `edit-video` | Herk Edit Kit: the full talking-head edit (transcript, silences, mistakes, story, motion graphics, verified render) | "use edit-video on input/raw.mp4" |
 | `short-form-edit` | Herk Edit Kit: reels, Shorts and short ads with a hook, captions, B-roll and sound | "turn input/raw.mp4 into a 9:16 reel" |
 | `cut-silences`, `cut-mistakes` | Herk Edit Kit: transcript-driven silence cuts, then a reviewed list of retakes, stutters and false starts | "remove my retakes and stutters" |
@@ -181,7 +192,7 @@ How Nate's videos are edited with these skills (the order, the numbers, the capt
 
 1. "Cut the dead air" (`video-editor`), or for a reel "use short-form-edit".
 2. "Show me the retakes and stutters to cut" (`cut-mistakes`). You approve each cut.
-3. "Make the key points pop" (`kinetic-text`) and "show the numbers as charts" (`morph-shapes`).
+3. "Make a flowchart of the steps" or "add a hook title" (`motion-templates`), "make the key points pop" (`kinetic-text`), and "show the numbers as charts" (`morph-shapes`).
 4. "Add captions" (`captions`). Captions go last, so they match the final timing.
 
 Each step saves to `work/`; only the finished video lands in `output/`.
@@ -255,6 +266,11 @@ claude-video-editor/
 │   └── skills/
 │       ├── video-editor/  dead air, everyday edits, keyword map and the automatic edit (references/auto-edit.md)
 │       ├── captions/, kinetic-text/, morph-shapes/
+│       ├── motion-templates/  12 templates (incl. hand-designed cards, lower thirds and title cards), 4 themes, 157 Lucide icons (ISC)
+│       ├── talking-head-recut/  the director's pass: plan, approve, design cards (adapted from HyperFrames)
+│       ├── text-behind/       one big word behind the speaker, with a local cutout
+│       ├── cut-the-curve/     exact motion timing and easing (adapted from HyperFrames)
+│       ├── sound-effects/     free sound effects timed to the graphics (sounds read from node_modules)
 │       └── edit-video/, short-form-edit/, cut-silences/, cut-mistakes/, ... (Herk Edit Kit)
 ├── video-projects/        Herk Edit Kit working folders (created when used)
 ├── tools/                 portable programs (created by setup)
@@ -273,7 +289,7 @@ claude-video-editor/
 
 This folder is public at https://github.com/arthur-htv/claude-video-editor.
 
-**License:** the setup, the `video-editor`, `captions`, `kinetic-text` and `morph-shapes` skills and this guide are MIT (see `LICENSE`). The bundled Herk Edit Kit, HyperFrames skills and fonts keep their own licenses, listed in `licenses/` and the skill folders.
+**License:** the setup, the `video-editor`, `captions`, `kinetic-text` and `morph-shapes` skills and this guide are MIT (see `LICENSE`). The bundled Herk Edit Kit, HyperFrames skills and fonts keep their own licenses, listed in `licenses/` and the skill folders. Parts adapted from HeyGen's HyperFrames (Apache-2.0) carry a NOTICE in their folder: `talking-head-recut`, `cut-the-curve`, `text-behind`, the hyperframes skills, and the registry looks in `motion-templates/assets/registry/`. The sound effects stay in `node_modules` and are never committed: their Pixabay license allows them in your videos but not shared on their own.
 
 The `.gitignore` already keeps the big and personal things out of git: `tools/`, `.venv/`, `node_modules/`, `work/`, `video-projects/`, `.env`, and the contents of `input/` and `output/`. Only the setup scripts, the guides, the skills and the style library get shared, about 2.5 MB. Anyone who clones the folder runs the setup once (Step 3) and has the same editor.
 
@@ -286,6 +302,8 @@ Before you push changes, run `git status` and check that no video, API key or `.
 | Windows: "running scripts is disabled on this system" | Use `setup.cmd`, or the full command `powershell -NoProfile -ExecutionPolicy Bypass -File setup.ps1`. |
 | The setup stopped with a download error | Usually a network hiccup or a firewall. Run the setup again; finished steps are skipped. |
 | "checksum mismatch" | The download was damaged. Run the setup again. If it keeps happening, your network may be altering downloads (some company proxies do). |
+| `text-behind` fails on its first run | The first run downloads a free cutout model (168 MB) and a runtime (214 MB) into `~/.cache/hyperframes`, which needs internet once (about 3 minutes). Check the connection and run it again. Nothing is uploaded. |
+| "sound effects not found" | They come with HyperFrames in `node_modules`. Run the setup again. |
 | Antivirus removed `ffmpeg.exe` | Allow the `tools` folder in your antivirus, then run the setup again. |
 | Windows: "Importing the numpy C-extensions failed" or other DLL load errors | The folder sits too deep: Windows has a 260-character path limit and some library files are nested deeply. Move the folder somewhere short, such as `Documents\claude-video-editor`, and run the setup again. |
 | Linux: setup asks for `curl` or `xz` | `sudo apt install curl xz-utils` (Debian / Ubuntu), then run the setup again. |
@@ -303,10 +321,36 @@ Before you push changes, run `git status` and check that no video, API key or `.
 Delete the folder. Two things HyperFrames keeps outside the folder, which you can also delete:
 
 - its headless Chrome, in `~/.cache/hyperframes` (Windows: `C:\Users\<you>\.cache\hyperframes`)
-- its own Claude skills (`hyperframes`, `hyperframes-cli`, `hyperframes-registry`, `media-use`), in `~/.claude/skills` and `~/.agents/skills`. These appear only if HyperFrames was ever run outside this folder's tools: this folder turns that install off and already contains those skills.
+- its own Claude skills (`hyperframes`, `hyperframes-cli`, `hyperframes-registry`, `media-use`), in `~/.claude/skills` and `~/.agents/skills`. These appear only if HyperFrames was ever run outside this folder's tools: this folder turns that install off and already contains the first three (`media-use` is not included).
 
 ## Changelog
 
+- **2026-10-30 (more from HyperFrames):**
+  - The `hyperframes`, `hyperframes-cli` and `hyperframes-registry` skills now match the pinned HyperFrames CLI (0.8.221; the registry guide is from upstream main). The new guides were merged in next to the old ones, which other skills still use. Each starts with an "In this folder" note: footage edits go through `video-editor`, HeyGen paid and upload features need your OK, and `/video-editor:auto` uses this folder's own templates first.
+  - New `cut-the-curve` skill: nine tested motion recipes with exact timing and easing. Cards now enter on `expo.out`, a full-screen payoff lands with an inverse zoom, and the flowchart camera glides slow-fast-slow.
+  - New `sound-effects` skill, a step of `/video-editor:auto` before captions: each sound lands one frame after its graphic, sits under your voice, and the mix leaves the voice and picture untouched. Check with `.venv/Scripts/python .claude/skills/sound-effects/scripts/test_sfx.py`.
+  - New `text-behind` skill: one big word behind the speaker with a local cutout (u2net via HyperFrames). It places the word so the head covers part of it while every letter stays readable, in the theme's font and colour, and composites in one encode with the audio copied.
+  - Three new templates adapted from the HyperFrames registry: `lower-third`, `title-card` (calm or lockup) and `annotate` (hand-drawn circle or underline).
+  - Fixes from an end-to-end test of the director step: the apple theme no longer bounces and its panels are less see-through, previews go to `work/previews/` instead of `output/`, unchanged template clips are reused instead of re-rendered, the face position is measured at the start, and the spacing and timing rules agree.
+- **2026-10-30 (directed graphics):**
+  - New `talking-head-recut` skill, now the graphics step of `/video-editor:auto`: Claude writes a director's plan (every graphic, timed to the word), shows it for your OK, then designs each card by hand. HeyGen retired the original on 2026-10-21; this version is rebuilt on the local pipeline, with its tested timing and placement numbers.
+  - New `card` template: renders a card Claude writes (HTML and GSAP) with the theme, fonts, icons and check frames of the other templates. Web links are refused.
+  - New `apple` theme and `--style apple` captions, with the Inter font (OFL) bundled.
+  - Three tested example cards: a stat with a count-up, key points that build as they're said, and a full-screen statement.
+- **2026-10-30 (motion templates):**
+  - New `motion-templates` skill with 8 templates: flowchart explainer, steps, compare, quote, chapter, hook title, label tags and save / follow card.
+  - 3 themes: blueprint, midnight and paper.
+  - `/video-editor:auto` now adds templates where the speech fits.
+  - New `hand` caption style: handwriting, with the spoken word lit up.
+  - Bundled assets:
+    - the Architects Daughter font (OFL), in `video-editor/assets/fonts`
+    - 157 Lucide line icons (ISC, license in `motion-templates/assets/icons`)
+  - `build_template.py --self-test` checks every template in every theme.
+  - Fixes from a full test run:
+    - Captions no longer drop a quick one-word caption, and a word that would flash by alone joins its neighbours. Check with `.venv/Scripts/python tests/test_captions.py`.
+    - The flowchart recap plays by itself when there are about 3.4 s after the last box, and holds the full map before the fade.
+    - `find_emphasis.py --skip` keeps kinetic text out of graphic windows.
+    - The auto-edit guide is clearer about spacing (hook and save card don't count), caption style with blueprint, and hook placement in vertical video.
 - **2026-10-30 (automatic edit):**
   - New `/video-editor:auto` command and "auto" keyword. Claude profiles each video (short, medium or long) and then runs the whole chain itself: dead air, retakes, morph charts where numbers are said, kinetic text, captions.
   - The `video-editor` skill maps single keywords ("captions", "highlights", "chart", "retakes") to the right skills and always runs them in the right order.
@@ -317,6 +361,7 @@ Delete the folder. Two things HyperFrames keeps outside the folder, which you ca
     - The check / X label sits in a dark box.
     - Kinetic-text keywords can be phrases ("phone is enough").
     - Clearer rules for how far apart graphics go and how long a cutaway lasts.
+  - The automatic edit first looks at frames of the source. On an already-edited video (for example a downloaded reel with captions burned in), it skips captions and repeated text rather than stacking a second set on top.
 - **2026-10-30 (update):** Added the Herk Edit Kit:
   - its 14 skills, tools and style library
   - its playbook, motion philosophy and library guide

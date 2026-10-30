@@ -82,7 +82,7 @@ Every visible element must have continuous motion. A still image on a still back
 Check the storyboard's transition specification for this beat:
 
 - **CSS transition**: implement the exit animation (e.g., `y:-150, blur:30px, 0.33s power2.in`). The next composition handles its own entry.
-- **Shader transition**: no exit animation needed — the shader handles the blend. Read `skills/hyperframes/references/transitions/shader-setup.md` for the full WebGL boilerplate and `skills/hyperframes/references/transitions/shader-transitions.md` for the fragment shader. Copy the FULL boilerplate — a simplified version produces black screens.
+- **Shader transition**: no exit animation needed — the shader handles the blend. Shader transitions are registry blocks: `npx hyperframes catalog --tag shader --type block --json`, then `npx hyperframes add <name>` (see the `hyperframes-registry` skill). Use the block's full WebGL setup as shipped — a simplified version produces black screens.
 - **Hard cut**: no exit animation. The scene simply ends.
 
 For all CSS transition types and their GSAP implementations, read `skills/hyperframes/references/transitions/catalog.md`.

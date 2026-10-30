@@ -1,0 +1,31 @@
+{
+  "name": "midnight",
+  "description": "Near-black, clean bold sans, teal accent, crisp line icons. Tech, business, polished talking heads. Matches the kinetic-text and morph-shapes look; pairs with the 'reel' caption style.",
+  "captions": "reel",
+  "grid": true,
+  "vignette": true,
+  "sketch": false,
+  "vars": {
+    "bg": "#0a0c10",
+    "grid": "rgba(255,255,255,0.025)",
+    "grid-major": "rgba(255,255,255,0.05)",
+    "vignette": "rgba(0,0,0,0.6)",
+    "panel": "rgba(17,19,26,0.95)",
+    "line": "rgba(255,255,255,0.22)",
+    "glow": "0 calc(var(--u)*.01) calc(var(--u)*.04) rgba(0,0,0,.5)",
+    "shadow": "0 calc(var(--u)*.006) calc(var(--u)*.02) rgba(0,0,0,.55)",
+    "text": "#ffffff",
+    "muted": "#a5adbd",
+    "accent": "#2ee6d6",
+    "on-accent": "#06221f",
+    "good": "#4ade80",
+    "bad": "#ff5a5f",
+    "tile": "#05060a",
+    "ink": "#ffffff",
+    "radius": "calc(var(--u)*.022)",
+    "font-display": "'Montserrat XB'",
+    "font-body": "'Montserrat XB'",
+    "case": "uppercase",
+    "tracking": "0.005em"
+  }
+}

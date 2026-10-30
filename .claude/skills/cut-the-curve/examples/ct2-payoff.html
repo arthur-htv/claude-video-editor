@@ -1,0 +1,43 @@
+<!-- Full-screen statement (spec "mode": "cutaway"). Recipes 1, 5, 6 and 2 of cut-the-curve: the first line
+     arrives, a zoom-through swaps it for the next, a held beat, then the payoff lands with an inverse zoom.
+     Said: "Most people wait ... a year or more. ... With this, about 90 days, for a business credit score."
+     Card 0.00-4.60 s. Cut to line B at 1.50 on "a year"; payoff cut at 2.75 on "90"; sub-line at 3.40. -->
+<div class="ct2">
+  <div class="ct2-l" id="ct2a">Most people wait</div>
+  <div class="ct2-l" id="ct2b">a year or more.</div>
+  <div class="ct2-l" id="ct2c"><span class="ct2-n disp">90 days</span></div>
+  <div class="ct2-s">for a business credit score</div>
+</div>
+<style>
+.ct2{position:absolute;left:8%;right:8%;top:0;bottom:22%}
+.ct2-l{position:absolute;left:0;right:0;top:36%;height:20%;display:flex;align-items:center;justify-content:center;white-space:nowrap;
+ font-weight:700;font-size:calc(var(--u)*.085);line-height:1.1;letter-spacing:-0.025em;opacity:0}
+.ct2-n{font-size:calc(var(--u)*.2);line-height:1;background:linear-gradient(100deg,#2997ff 10%,#a971ff 90%);
+ -webkit-background-clip:text;background-clip:text;color:transparent}
+.ct2-s{position:absolute;left:0;right:0;top:60%;text-align:center;color:var(--muted);font-weight:600;
+ font-size:calc(var(--u)*.05);letter-spacing:-0.015em;opacity:0}
+</style>
+<script>
+// 1. Arrival of bare text: 0.6 s expo.out, rise 40 px, blur 10 -> 0.
+tl.fromTo("#ct2a",{opacity:0,y:40,filter:"blur(10px)"},{opacity:1,y:0,filter:"blur(0px)",duration:0.6,ease:"expo.out"},0.05);
+
+// 5. Zoom-through (push): everything grows. Exit 0.2 s power3.in with a separate linear fade, hard swap, entry 0.5 s expo.out.
+var E = 1.30, C = E + 0.2;
+tl.to("#ct2a",{scale:1.2,filter:"blur(10px)",duration:0.2,ease:"power3.in"},E);
+tl.to("#ct2a",{opacity:0.15,duration:0.2,ease:"none"},E);
+tl.set("#ct2a",{opacity:0},C);
+tl.set("#ct2b",{opacity:0.15,scale:0.75,filter:"blur(10px)"},C);
+tl.to("#ct2b",{opacity:1,scale:1,filter:"blur(0px)",duration:0.5,ease:"expo.out"},C);
+
+// Line B has settled by about 2.0; it holds still for about 0.55 s before the payoff (stillness before the climax).
+// 6. Inverse zoom (pull): everything shrinks. Exit 1 -> 0.8, the payoff arrives oversized 1.25 -> 1.
+var E2 = 2.55, C2 = E2 + 0.2;
+tl.to("#ct2b",{scale:0.8,filter:"blur(10px)",duration:0.2,ease:"power3.in"},E2);
+tl.to("#ct2b",{opacity:0.15,duration:0.2,ease:"none"},E2);
+tl.set("#ct2b",{opacity:0},C2);
+tl.set("#ct2c",{opacity:0.15,scale:1.25,filter:"blur(10px)"},C2);
+tl.to("#ct2c",{opacity:1,scale:1,filter:"blur(0px)",duration:0.5,ease:"expo.out"},C2);
+
+// 2. Staged reveal: the sub-line on its own word, after the payoff has settled.
+tl.fromTo(".ct2-s",{opacity:0,y:24},{opacity:1,y:0,duration:0.5,ease:"expo.out"},3.40);
+</script>

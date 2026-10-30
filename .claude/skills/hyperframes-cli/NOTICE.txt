@@ -1,4 +1,15 @@
-HyperFrames skill ecosystem, HeyGen, Inc.
-Source: https://github.com/heygen-com/hyperframes
-Apache-2.0; see licenses/HYPERFRAMES-LICENSE at kit root.
-Herk Edit Kit adaptations: runtime-relative skill paths and portable packaging.
+HyperFrames skills, HeyGen, Inc.
+Source: https://github.com/heygen-com/hyperframes (skills/hyperframes-cli)
+License: Apache-2.0; see licenses/HYPERFRAMES-LICENSE at the project root.
+
+Versions
+- Earlier SKILL.md: an earlier upstream version, vendored through the Herk Edit
+  Kit (runtime-relative skill paths and portable packaging).
+- Updated 2026-10-30 from the npm package hyperframes@0.8.221
+  (dist/skills/hyperframes-cli), the CLI version this project pins.
+
+Changes made in this project (Apache-2.0, section 4(b))
+- SKILL.md: new frontmatter description and an "In this folder" block added at
+  the top. The rest of the body is the 0.8.221 text; the earlier body was
+  superseded and removed.
+- references/: the 0.8.221 files, unchanged.

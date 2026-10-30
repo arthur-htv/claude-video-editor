@@ -37,6 +37,12 @@ STYLES = {
     "reel": dict(words=3, chars=(16, 22), size=0.059, caps=True, colors=True, serif=True),
     "minimal": dict(words=1, chars=(14, 18), size=0.046, caps=True, colors=False, serif=False),
     "clean": dict(words=7, chars=(30, 42), size=0.05, caps=False, colors=False, serif=False),
+    # handwriting, no box, white with a soft dark outline; the word being spoken lights up (blueprint templates)
+    "hand": dict(words=3, chars=(18, 24), size=0.054, caps=False, colors=False, serif=False, strip=True,
+                 font=("Architects Daughter", "ArchitectsDaughter-Regular.ttf"), boxed=False, active="#5DB4FF"),
+    # Apple-style: clean semibold sans, no box, the spoken word lit up in system blue (apple theme)
+    "apple": dict(words=4, chars=(20, 28), size=0.048, caps=False, colors=False, serif=False, strip=True,
+                  font=("Inter SemiBold", "Inter-SemiBold.ttf"), boxed=False, active="#2997FF"),
 }
 HEX = {"white": "#FFFFFF", "teal": "#2EE6D6", "red": "#FF5A5F", "green": "#4ADE80", "yellow": "#FFD84A"}
 BOX, EDGE = "#121212", "#E6E6E6"
@@ -58,12 +64,12 @@ NUMBER = re.compile(r"^[$€£]?\d[\d,.]*(%|x|k|m|b)?$|^\d+(st|nd|rd|th)$", re.I
 
 # ---------------------------------------------------------------------------- planning
 
-def clean_word(word: str, caps: bool) -> str:
+def clean_word(word: str, caps: bool, strip: bool | None = None) -> str:
     w = word.strip()
-    if caps:
-        # keep ? ! ' % $ in caps style, and the , or . inside numbers (1,000 and 3.5x)
-        w = re.sub(r"(?<!\d)[.,]|[.,](?!\d)|[;:…\"“”]+", "", w).upper()
-    return w
+    if caps if strip is None else strip:
+        # keep ? ! ' % $, and the , or . inside numbers (1,000 and 3.5x)
+        w = re.sub(r"(?<!\d)[.,]|[.,](?!\d)|[;:…\"“”]+", "", w)
+    return w.upper() if caps else w
 
 
 # Words that lean on the next word: a chunk should not end with them ("WELCOME BACK | TO THE CHANNEL").
@@ -96,6 +102,8 @@ def split_phrase(phrase: list[dict], max_words: int, max_chars: int) -> list[lis
                     cost += 1.2                    # splitting two content words ("raw | footage")
             if len(part) == 1 and n > 1 and max_words > 1:
                 cost += 1.2 if last in DANGLE else 0.5
+                if part[0]["end"] - part[0]["start"] < 0.3:
+                    cost += 1.5                    # a one-word flash too quick to read
             if max_words >= 5 and len(part) <= 2 and n >= 5:
                 cost += 0.8                        # subtitle lines: no stubby "today I" lines
             if best[j] + cost < best[i]:
@@ -154,9 +162,12 @@ def plan_captions(words: list[dict], style: str, fps: float, vertical: bool,
         raw = [w["word"] for w in c]
         color, strength = classify(raw, sentence_start) if (st["colors"] and use_color) else ("white", 0)
         out.append({"start": max(0.0, c[0]["start"] - lead), "word_end": c[-1]["end"],
-                    "text": " ".join(clean_word(w, st["caps"]) for w in raw).strip(),
+                    "text": " ".join(clean_word(w, st["caps"], st.get("strip")) for w in raw).strip(),
                     "color": color, "strength": strength, "serif": False,
                     "soft": all(w.lower().strip(",.!?") in SOFT for w in raw)})
+        if st.get("active"):          # word timings, so the spoken word can light up
+            out[-1]["words"] = [{"text": clean_word(w["word"], st["caps"], st.get("strip")),
+                                 "start": round(w["start"], 3), "end": round(w["end"], 3)} for w in c]
     # timing: hard swap to the next chunk, or hold briefly before a pause
     for i, c in enumerate(out):
         nxt = out[i + 1]["start"] if i + 1 < len(out) else None
@@ -225,10 +236,13 @@ def build_ass(plan: dict) -> str:
     w, h = plan["width"], plan["height"]
     st = STYLES[plan["style"]]
     em = st["size"] * min(w, h) * plan.get("scale", 1.0)
-    fs = round(em * font_ratio(SANS_FILE))
+    font, font_file = st.get("font", (SANS, SANS_FILE))
+    fs = round(em * font_ratio(font_file))
     fs_serif = round(em * 1.08 * font_ratio(SERIF_FILE))
     pad, edge = max(4, round(0.30 * em)), max(2, round(0.05 * em))
     x, y = round(w / 2), round(plan["position"] * h)
+    if not st.get("boxed", True):
+        return build_ass_plain(plan, st, font, fs, em, x, y)
     header = f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: {w}
@@ -255,6 +269,48 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     return header + "\n".join(lines) + "\n"
 
 
+def build_ass_plain(plan: dict, st: dict, font: str, fs: int, em: float, x: int, y: int) -> str:
+    """No box: white text with a soft dark outline. With st["active"], the word being spoken takes that color."""
+    w, h = plan["width"], plan["height"]
+    outline, shadow = max(2, round(0.08 * em)), max(1, round(0.05 * em))
+    header = f"""[Script Info]
+ScriptType: v4.00+
+PlayResX: {w}
+PlayResY: {h}
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Plain,{font},{fs},&H00FFFFFF&,&H00FFFFFF&,&H00141414&,&H8C000000&,0,0,0,0,100,100,1,0,1,{outline},{shadow},5,0,0,0,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+"""
+    lead, white = 2.0 / (plan.get("fps") or 30), ass_color("#FFFFFF")
+    hot = ass_color(st["active"]) if st.get("active") else None
+    lines = []
+    for c in plan["chunks"]:
+        words = c.get("words") or []
+        toks = c["text"].split()
+        if not (hot and words):
+            col = ass_color(HEX.get(c.get("color", "white"), "#FFFFFF"))
+            lines.append(f"Dialogue: 0,{ass_time(c['start'])},{ass_time(c['end'])},Plain,,0,0,0,,"
+                         f"{{\\pos({x},{y})\\c{col}}}{ass_text(c['text'])}")
+            continue
+        if len(toks) != len(words):            # the text was edited: trust it, light the words by position
+            toks = toks or [wd["text"] for wd in words]
+        for k in range(len(toks)):
+            wd = words[min(k, len(words) - 1)]
+            s = c["start"] if k == 0 else max(c["start"], wd["start"] - lead)
+            e = c["end"] if k == len(toks) - 1 else min(c["end"], words[min(k + 1, len(words) - 1)]["start"] - lead)
+            if e - s < 0.01:
+                continue
+            txt = " ".join(f"{{\\c{hot}}}{ass_text(t)}{{\\c{white}}}" if j == k else ass_text(t) for j, t in enumerate(toks))
+            lines.append(f"Dialogue: 0,{ass_time(s)},{ass_time(e)},Plain,,0,0,0,,{{\\pos({x},{y})}}{txt}")
+    return header + "\n".join(lines) + "\n"
+
+
 def write_srt(chunks: list[dict], path: Path) -> None:
     def t(s: float) -> str:
         ms = int(round(s * 1000))
@@ -278,7 +334,7 @@ def burn(video: Path, plan: dict, out: Path, crf: int, speed: str) -> None:
     # are copied next to the subtitle file inside the project.
     fonts_dir = work / "fonts"
     fonts_dir.mkdir(exist_ok=True)
-    for f in (SANS_FILE, SERIF_FILE):
+    for f in {SANS_FILE, SERIF_FILE, STYLES[plan["style"]].get("font", (SANS, SANS_FILE))[1]}:
         if not (fonts_dir / f).exists():
             shutil.copy2(FONT_DIR / f, fonts_dir / f)
     fonts = fonts_dir.relative_to(root).as_posix()
@@ -305,14 +361,16 @@ def windows(spec: str) -> list[tuple[float, float]]:
 def hide_during(chunks: list[dict], spec: str, min_len: float = 0.25) -> list[dict]:
     """Keep captions off the screen during 'start-end' windows (e.g. while a chart is shown).
     A caption that runs into a window is shortened to end at its edge, so a line said right before or after
-    a graphic still shows; only what would be left shorter than min_len seconds is dropped."""
+    a graphic still shows; only a caption a window cut shorter than min_len seconds is dropped."""
     out = []
     for c in chunks:
         s, e = c["start"], c["end"]
+        cut = False
         for a, b in windows(spec):
             if s < b and e > a:
                 s, e = (s, min(e, a)) if s < a else (max(s, b), e)
-        if e - s >= min_len:
+                cut = True
+        if not cut or e - s >= min_len:
             out.append({**c, "start": round(s, 3), "end": round(e, 3)})
     return out
 
@@ -327,7 +385,7 @@ def main() -> int:
     p.add_argument("--words", type=Path, help="word timings (.words.json or a kit transcript); default: transcribe now")
     p.add_argument("--model", default="small", help="speech model when transcribing (default small)")
     p.add_argument("--language", help="language code, e.g. en (default: detect)")
-    p.add_argument("--style", choices=list(STYLES), default="reel", help="reel (default), minimal, clean")
+    p.add_argument("--style", choices=list(STYLES), default="reel", help="reel (default), minimal, clean, hand, apple")
     p.add_argument("--position", default="auto", help="auto (below the face), top, middle, bottom, or 0-1")
     p.add_argument("--scale", type=float, default=1.0, help="text size multiplier (default 1.0)")
     p.add_argument("--no-color", action="store_true", help="all captions white")

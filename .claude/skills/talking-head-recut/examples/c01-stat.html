@@ -1,0 +1,23 @@
+<!-- Stat card over the speaker. Said: "It is free, and it takes 10 minutes." Card 8.40-10.85 s.
+     The number counts up from the entrance and lands on "10" (10.00); the pill lands on "free" (8.82). -->
+<div class="c01">
+  <div class="c01-k">EIN from the IRS</div>
+  <div class="c01-row">
+    <div class="c01-stat disp"><span class="c01-n">0</span><span class="c01-u">min</span></div>
+    <div class="c01-free pill">Free</div>
+  </div>
+</div>
+<style>
+.c01{position:absolute;left:7%;right:7%;top:50%;box-sizing:border-box;padding:calc(var(--u)*.05) calc(var(--u)*.06);
+ background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--glow)}
+.c01-k{color:var(--muted);font-weight:600;font-size:calc(var(--u)*.038);letter-spacing:-0.01em}
+.c01-row{display:flex;align-items:baseline;justify-content:space-between;margin-top:calc(var(--u)*.012)}
+.c01-stat{font-size:calc(var(--u)*.19);line-height:1;color:var(--text)}
+.c01-u{font-size:.38em;color:var(--muted);font-weight:600;margin-left:.18em;letter-spacing:-0.01em}
+.c01-free{font-size:calc(var(--u)*.042);font-weight:600;border-radius:999px;padding:.4em 1em .38em}
+</style>
+<script>
+tl.fromTo(".c01",{opacity:0,y:40,filter:"blur(14px)"},{opacity:1,y:0,filter:"blur(0px)",duration:0.6,ease:"expo.out"},0.0);
+tl.fromTo(".c01-free",{opacity:0,scale:0.85},{opacity:1,scale:1,duration:0.45,ease:"expo.out"},0.3);
+tl.fromTo(".c01-n",{innerText:0},{innerText:10,duration:1.4,ease:"power2.out",snap:{innerText:1}},0.2);
+</script>

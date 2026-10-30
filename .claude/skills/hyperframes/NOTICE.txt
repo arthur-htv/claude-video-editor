@@ -1,4 +1,27 @@
-HyperFrames skill ecosystem, HeyGen, Inc.
-Source: https://github.com/heygen-com/hyperframes
-Apache-2.0; see licenses/HYPERFRAMES-LICENSE at kit root.
-Herk Edit Kit adaptations: runtime-relative skill paths and portable packaging.
+HyperFrames skills, HeyGen, Inc.
+Source: https://github.com/heygen-com/hyperframes (skills/hyperframes)
+License: Apache-2.0; see licenses/HYPERFRAMES-LICENSE at the project root.
+
+Versions
+- Earlier files: an earlier upstream version, vendored through the Herk Edit Kit
+  (runtime-relative skill paths and portable packaging).
+- Updated 2026-10-30 from the npm package hyperframes@0.8.221
+  (dist/skills/hyperframes), the CLI version this project pins.
+
+Changes made in this project (Apache-2.0, section 4(b))
+- SKILL.md: new frontmatter description; an "In this folder" block added at the
+  top and an "Older guides in this folder" list at the end. The rest of the body
+  is the 0.8.221 text.
+- legacy-guide.md: the earlier SKILL.md body, with a header note and two path
+  fixes (captions-styles.md link, animation-map.mjs path).
+- references/captions-styles.md: the earlier references/captions.md, renamed.
+  references/captions.md is the 0.8.221 file plus an "In this folder" pointer.
+- references/look.md: one line saying the frame presets are not shipped.
+- Not copied: assets/frame-presets/ (slide-deck looks), scripts/plugin-cli.mjs,
+  scripts/lib/ and scripts/*.test.mjs (plugin launcher and upstream tests).
+- Kept unchanged from the earlier version: palettes/, visual-styles.md,
+  house-style.md, patterns.md, data-in-motion.md, references/transitions.md,
+  references/transitions/, references/typography.md, motion-principles.md,
+  css-patterns.md, audio-reactive.md, dynamic-techniques.md,
+  transcript-guide.md, tts.md, scripts/animation-map.mjs,
+  scripts/contrast-report.mjs.

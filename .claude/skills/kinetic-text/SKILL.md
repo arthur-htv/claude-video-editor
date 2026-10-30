@@ -16,7 +16,7 @@ The point is restraint. Text on every sentence is noise. A few well-timed moment
    ```
    PY K/find_emphasis.py work/talk.mp4 --keywords "Claude, 10x"
    ```
-   It scores every word by delivery (louder than the speaker's own running level, stretched out, a pause before it) and by content (numbers, money, absolutes like "never", names, contrasts, the user's keywords). It writes the strongest, spaced-out picks to `work/talk.emphasis.json` and prints them with the reasons. Pass `--words work/talk.words.json` if a transcript exists, `--max N` and `--min-gap S` to tune density.
+   It scores every word by delivery (louder than the speaker's own running level, stretched out, a pause before it) and by content (numbers, money, absolutes like "never", names, contrasts, the user's keywords). It writes the strongest, spaced-out picks to `work/talk.emphasis.json` and prints them with the reasons. Pass `--words work/talk.words.json` if a transcript exists, `--max N` and `--min-gap S` to tune density, and `--skip "3.2-27.6,30-33"` to keep moments out of the times other graphics are on screen.
 3. **Edit the plan.** You and the user decide. The detector proposes, judgment picks:
    - Keep moments that carry the message. Drop filler ones. If the user named moments ("pop 'ten times faster' at 0:32"), add them.
    - Keep the text short (1-4 words) and exactly as spoken, apart from capitalization or a symbol ("10x").
@@ -35,3 +35,5 @@ The point is restraint. Text on every sentence is noise. A few well-timed moment
 - With music or morph graphics: each step is a pass from `work/` into the next file, and only the last pass goes to `output/`.
 
 The motion follows `MOTION_PHILOSOPHY.md`: one idea per beat, the visual lands just ahead of the word, `back.out` / `expo.out` entries, quick exits, and every timeline fills its slot so there are no black flashes. For a fully custom kinetic sequence (a hook title, a 15-second promo), build a HyperFrames composition with the `hyperframes` and `gsap` skills instead.
+
+For exact timing and easing (a waterfall entry for a word, a zoom-through when one word replaces another, and fixes when the user says "too bouncy" or "feels cheap"), use the `cut-the-curve` skill.

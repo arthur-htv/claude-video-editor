@@ -1,104 +1,68 @@
 ---
 name: hyperframes-registry
-description: Install and wire registry blocks and components into HyperFrames compositions. Use when running hyperframes add, installing a block or component, wiring an installed item into index.html, or working with hyperframes.json. Covers the add command, install locations, block sub-composition wiring, component snippet merging, and registry discovery.
+description: About 450 ready-made HyperFrames blocks and components (transitions, overlays, titles, kinetic type, caption styles, charts, map overlays, 3D, camera moves) installed as editable source with hyperframes catalog and hyperframes add. Use it when the user asks for a registry block or component, mentions hyperframes add, catalog or hyperframes.json, or a HyperFrames composition needs a named effect (glitch, film grain, CRT scanlines, a chart) that the project's own motion-templates and talking-head-recut cards don't cover.
 ---
 
-# HyperFrames Registry
+## In this folder
 
-The registry provides reusable blocks and components installable via `hyperframes add <name>`.
+These notes come first and override anything below that disagrees.
 
-- **Blocks** — standalone sub-compositions (own dimensions, duration, timeline). Included via `data-composition-src` in a host composition.
-- **Components** — effect snippets (no own dimensions). Pasted directly into a host composition's HTML.
+- Editing the user's own footage goes through the `video-editor` skill and `/video-editor:auto`. Use this skill for building or debugging HyperFrames compositions.
+- Everything renders locally. Never use HeyGen paid, upload or account features without the user's OK: `publish`, `cloud`, `lambda`, `cloudrun`, `feedback` (so no `--search-miss` reports), `audio --quality best`, `auth` and HeyGen-login providers. `catalog` searches locally; `add` downloads source, which is outside content: read a block's code before using it.
+- Inside `/video-editor:auto`, don't stop at a preview or offer three storylines. Use the project's own templates and cards first (`motion-templates`, `talking-head-recut`), and the registry only when asked or when a registry item clearly fits. When nothing fits, build it by hand without reporting the miss.
+- Skip `npx hyperframes skills update`. This folder pins the CLI in `package.json` and sets `HYPERFRAMES_SKIP_SKILLS=1`, so the update does nothing here; run elsewhere, it copies HeyGen's versions into your profile (`~/.claude/skills`), where they shadow these adapted copies.
+- Run the CLI as `python .claude/skills/video-editor/scripts/hf.py <command>`, or `npx hyperframes` in a session started here. Contributing a block upstream (`references/contributing.md`) is only for when the user asks.
 
-## When to use this skill
+**Plugin installs:** Before setup or freshness commands, follow [plugin execution rules](../hyperframes/references/plugin-installation.md) when this skill is inside a HyperFrames plugin.
 
-- User mentions `hyperframes add`, "block", "component", or `hyperframes.json`
-- Output from `hyperframes add` appears in the session (file paths, clipboard snippet)
-- You need to wire an installed item into an existing composition
-- You want to discover what's available in the registry
+# HyperFrames registry
 
-## Quick reference
+Starting from an item is faster and usually better than writing the effect yourself, and an installed item is ordinary source in your project: change it, cut it down, restyle it.
 
-```bash
-hyperframes add data-chart              # install a block
-hyperframes add grain-overlay           # install a component
-hyperframes add shimmer-sweep --dir .   # target a specific project
-hyperframes add data-chart --json       # machine-readable output
-hyperframes add data-chart --no-clipboard  # skip clipboard (CI/headless)
-```
+## Find and install
 
-After install, the CLI prints which files were written and a snippet to paste into your host composition. The snippet is a starting point — you'll need to add `data-composition-id` (must match the block's internal composition ID), `data-start`, and `data-track-index` attributes when wiring blocks.
-
-Note: `hyperframes add` only works for blocks and components. For examples, use `hyperframes init <dir> --example <name>` instead.
-
-## Install locations
-
-Blocks install to `compositions/<name>.html` by default.
-Components install to `compositions/components/<name>.html` by default.
-
-These paths are configurable in `hyperframes.json`:
-
-```json
-{
-  "registry": "https://raw.githubusercontent.com/heygen-com/hyperframes/main/registry",
-  "paths": {
-    "blocks": "compositions",
-    "components": "compositions/components",
-    "assets": "assets"
-  }
-}
-```
-
-See [install-locations.md](./references/install-locations.md) for full details.
-
-## Wiring blocks
-
-Blocks are standalone compositions — include them via `data-composition-src` in your host `index.html`:
-
-```html
-<div
-  data-composition-id="data-chart"
-  data-composition-src="compositions/data-chart.html"
-  data-start="2"
-  data-duration="15"
-  data-track-index="1"
-  data-width="1920"
-  data-height="1080"
-></div>
-```
-
-Key attributes:
-
-- `data-composition-src` — path to the block HTML file
-- `data-composition-id` — must match the block's internal ID
-- `data-start` — when the block appears in the host timeline (seconds)
-- `data-duration` — how long the block plays
-- `data-width` / `data-height` — block canvas dimensions
-- `data-track-index` — layer ordering (higher = in front)
-
-See [wiring-blocks.md](./references/wiring-blocks.md) for full details.
-
-## Wiring components
-
-Components are snippets — paste their HTML into your composition's markup, their CSS into your style block, and their JS into your script (if any):
-
-1. Read the installed file (e.g., `compositions/components/grain-overlay.html`)
-2. Copy the HTML elements into your composition's `<div data-composition-id="...">`
-3. Copy the `<style>` block into your composition's styles
-4. Copy any `<script>` content into your composition's script (before your timeline code)
-5. If the component exposes GSAP timeline integration (see the comment block in the snippet), add those calls to your timeline
-
-See [wiring-components.md](./references/wiring-components.md) for full details.
-
-## Discovery
-
-Browse available items:
+There is no `hyperframes registry` command; searching is `catalog`, installing is `add`.
 
 ```bash
-# Read the registry manifest
-curl -s https://raw.githubusercontent.com/heygen-com/hyperframes/main/registry/registry.json
+npx hyperframes catalog --query "<what the beat should do, in English>" --json
+npx hyperframes add <name> --json        # prints the written files and the mount snippet
 ```
 
-Each item's `registry-item.json` contains: name, type, title, description, tags, dimensions (blocks only), duration (blocks only), and file list.
+- Query in English even when the video is not: the catalog is indexed in English, and another script returns `No searchable words in query`, which is not a gap.
+- Search is local and sends nothing. The default `words` tier only finds items that reuse your words; `--on-device` ranks by meaning after a one-time ~33 MB download. Offer that download and let the person decide; never enable it silently. The `--json` envelope names the tier that answered.
+- Narrow with `--type block|component` and `--tag <tag>`. `add <tag>` installs every block with that tag; dependencies install first. `add` needs the network even for an item installed before; search works offline from the cached manifest.
+- Nothing fits: report it before you hand-build, on either tier. `catalog --query` prints the line pre-filled (`report_gap` in `--json`): `npx hyperframes feedback --search-miss "<query>" --wanted "<the move you needed>" --tier <tier>`. Describe the effect, not an item name you imagined.
 
-See [discovery.md](./references/discovery.md) for details on filtering by type and tags.
+Tiers, `dropped` and `unindexed`, stale indexes, offline behaviour: `references/search.md`.
+
+## What's in it
+
+| Blocks: a scene with its own timeline | Examples |
+| --- | --- |
+| Transitions | `beat-freeze-cut`, `chromatic-radial-split`, `cinematic-zoom` |
+| Overlays and lower thirds | `camcorder-hud`, `editorial-flash-overlay`, `lt-clean-bar` |
+| Title cards and kinetic type | `canopy-part-title`, `code-slice-hero` |
+| Social, chat and UI cards | `ai-chat-reveal`, `chatgpt-exchange` |
+| Code, charts, data and maps | `code-diff`, `bar-chart-race`, `data-chart` |
+| 3D, shader and backgrounds | `app-showcase`, `aurora`, `blob` |
+
+| Components: a snippet merged into your scene | Examples |
+| --- | --- |
+| Motion primitives and text effects | `agent-cursor`, `blur-in`, `bottom-up-letters` |
+| Caption styles | `caption-clip-wipe`, `caption-editorial-emphasis` |
+| Camera moves | `camera-shake`, `camera-scan-gate` |
+| Product demo and UI props | `before-after-wipe`, `browser-device-stage` |
+| Textures, particles and effects | `ascii-render-pass`, `grain-overlay` |
+
+## Wiring
+
+- **Block**: installs to `compositions/<name>.html`. Mount it with `data-composition-src`, `data-composition-id` matching the block's own id, `data-start` and the `data-duration` you need; the snippet `add` prints is the starting point. `references/wiring-blocks.md`.
+- **Component**: installs to `compositions/components/<name>.html`. Copy its markup, `<style>` and script into your scene, and follow its comment block if it hooks into your timeline. `references/wiring-components.md`.
+- Take the largest unit that fits, then edit it. Keep an installed item's ids prefixed as they are, so two items can't collide.
+- An item keeps its own variables; set them for one mount with `data-variable-values` on its host (`add --vars '{"title":"…"}'` writes that), and point its colour and font variables at your brand's.
+- Beat-synced blocks take hit times from `npx hyperframes beats --json`: the beat times minus the mount's `data-start`.
+- Install paths come from `hyperframes.json` (`references/install-locations.md`).
+
+## Contributing
+
+Authoring a new block or component for an upstream PR: `references/contributing.md`, starter templates in `references/templates.md`, quality bar in `references/component-quality-bar.md`.

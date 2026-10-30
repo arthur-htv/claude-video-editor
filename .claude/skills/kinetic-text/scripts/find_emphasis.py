@@ -157,6 +157,7 @@ def main() -> int:
     p.add_argument("--keywords", default="", help="comma-separated words or phrases you want emphasized")
     p.add_argument("--max", type=int, help="most moments to pick (default: about one per 12 s, at least 3)")
     p.add_argument("--min-gap", type=float, default=5.0, help="seconds between picked moments (default 5)")
+    p.add_argument("--skip", default="", help="'start-end' windows where no moment may go, e.g. graphics: '3.2-27.6,30.6-33.1'")
     p.add_argument("--out", type=Path)
     args = p.parse_args()
 
@@ -181,11 +182,14 @@ def main() -> int:
     scored = sorted(score_words(words, loud, keywords), key=lambda x: -x["score"])
     runs = keyword_runs(words, keywords)
     limit = args.max or max(3, round(info.duration / 12))
+    skip = [tuple(float(x) for x in w.split("-")) for w in args.skip.split(",") if w.strip()]
     candidates, used = [], set()
     for s in scored:
         if s["score"] < 2.5 or s["i"] in used:
             continue
         lo, hi = runs.get(s["i"]) or build_phrase(words, s["i"])   # a keyword phrase stays whole
+        if any(words[lo]["start"] < b and words[hi]["end"] > a for a, b in skip):
+            continue
         if any(k in used for k in range(lo, hi + 1)):
             continue
         used.update(range(lo, hi + 1))

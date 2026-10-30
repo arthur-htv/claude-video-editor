@@ -1,0 +1,37 @@
+<!-- Panel over the speaker. Recipes 1, 9 and 7 of cut-the-curve: the panel arrives, a rack focus swaps it
+     to its new state (same panel, new number), then cut-the-curve carries it left into the next topic.
+     Said: "My score was 540. ... Six months later, 720. ... Next: build business credit." Card 0.00-5.00 s.
+     Rack-focus cut at 1.90 on "720"; cut-the-curve at 3.40 on "Next". -->
+<div class="ct3">
+  <div class="ct3-p" id="ct3a"><div class="ct3-k">Your score</div><div class="ct3-n disp bad">540</div></div>
+  <div class="ct3-p" id="ct3b"><div class="ct3-k">Six months later</div><div class="ct3-n disp good">720</div></div>
+  <div class="ct3-p" id="ct3c"><div class="ct3-k">Next step</div><div class="ct3-h disp">Build business credit</div></div>
+</div>
+<style>
+.ct3{position:absolute;left:7%;right:7%;top:50%}
+.ct3-p{position:absolute;left:0;right:0;top:0;box-sizing:border-box;padding:calc(var(--u)*.05) calc(var(--u)*.06);
+ background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--glow)}
+#ct3b,#ct3c{opacity:0}
+.ct3-k{color:var(--muted);font-weight:600;font-size:calc(var(--u)*.038);letter-spacing:-0.01em}
+.ct3-n{font-size:calc(var(--u)*.19);line-height:1;margin-top:calc(var(--u)*.012)}
+.ct3-h{font-size:calc(var(--u)*.072);line-height:1.05;margin-top:calc(var(--u)*.02)}
+</style>
+<script>
+// 1. Panel arrival: 0.6 s expo.out, rise 40 px, blur 14 -> 0 (a panel sits between text and full frame).
+tl.fromTo("#ct3a",{opacity:0,y:40,filter:"blur(14px)"},{opacity:1,y:0,filter:"blur(0px)",duration:0.6,ease:"expo.out"},0.0);
+
+// 9. Rack focus: the old state stays fully opaque, drifts 4vw and defocuses to 12 px; hard swap at peak blur.
+var R = 1.60;
+tl.to("#ct3a",{x:"-4vw",scale:1.06,filter:"blur(12px)",duration:0.3,ease:"power2.in"},R);
+tl.set("#ct3a",{opacity:0},R + 0.3);
+tl.set("#ct3b",{opacity:1,x:"4vw",scale:1.06,filter:"blur(12px)"},R + 0.3);
+tl.to("#ct3b",{x:0,scale:1,filter:"blur(0px)",duration:0.35,ease:"power2.out"},R + 0.3);
+
+// 7. Cut the curve at C: exit accelerates left 12vw (power4.in) and fades out just before the cut;
+//    the next panel continues left from +12vw, igniting at 0.35 opacity (power4.out). Same speed at the cut.
+var C = 3.40;
+tl.to("#ct3b",{x:"-12vw",filter:"blur(8px)",duration:0.33,ease:"power4.in"},C - 0.33);
+tl.to("#ct3b",{opacity:0,duration:0.3,ease:"power2.in"},C - 0.33);
+tl.set("#ct3c",{opacity:0.35,x:"12vw",filter:"blur(8px)"},C);
+tl.to("#ct3c",{opacity:1,x:0,filter:"blur(0px)",duration:0.42,ease:"power4.out"},C);
+</script>

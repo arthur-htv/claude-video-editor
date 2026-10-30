@@ -1,0 +1,31 @@
+{
+  "name": "paper",
+  "description": "Warm off-white paper, ink lines, hand-drawn icons, an orange-red accent and a serif headline. Education, lifestyle, story-driven or calm videos. Pairs with the 'reel' caption style.",
+  "captions": "reel",
+  "grid": true,
+  "vignette": false,
+  "sketch": true,
+  "vars": {
+    "bg": "#f3eee4",
+    "grid": "rgba(60,48,34,0.05)",
+    "grid-major": "rgba(60,48,34,0.09)",
+    "vignette": "rgba(0,0,0,0)",
+    "panel": "#fffcf6",
+    "line": "#2a241d",
+    "glow": "calc(var(--u)*.006) calc(var(--u)*.008) 0 rgba(42,36,29,.9)",
+    "shadow": "0 calc(var(--u)*.006) calc(var(--u)*.02) rgba(0,0,0,.25)",
+    "text": "#1f1b16",
+    "muted": "#6e6457",
+    "accent": "#e4572e",
+    "on-accent": "#ffffff",
+    "good": "#2f9e5b",
+    "bad": "#d63a3a",
+    "tile": "#efe6d6",
+    "ink": "#1f1b16",
+    "radius": "calc(var(--u)*.014)",
+    "font-display": "'Abril Fatface'",
+    "font-body": "'Montserrat XB'",
+    "case": "none",
+    "tracking": "0.005em"
+  }
+}

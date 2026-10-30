@@ -27,6 +27,10 @@ GSAP_FILES = ("gsap.min.js", "MorphSVGPlugin.min.js", "DrawSVGPlugin.min.js")
 FONT_CSS = """
 @font-face { font-family: 'Montserrat XB'; src: url('assets/fonts/Montserrat-ExtraBold.ttf'); font-weight: 800; }
 @font-face { font-family: 'Abril Fatface'; src: url('assets/fonts/AbrilFatface-Regular.ttf'); }
+@font-face { font-family: 'Architects Daughter'; src: url('assets/fonts/ArchitectsDaughter-Regular.ttf'); }
+@font-face { font-family: 'Inter'; src: url('assets/fonts/Inter-Regular.ttf'); font-weight: 400; }
+@font-face { font-family: 'Inter'; src: url('assets/fonts/Inter-SemiBold.ttf'); font-weight: 600; }
+@font-face { font-family: 'Inter'; src: url('assets/fonts/Inter-Bold.ttf'); font-weight: 700; }
 """
 
 # Meaningful colors (the editing playbook): red = wrong/loss, teal = concept/keyword, green = action/payoff.

@@ -1,0 +1,32 @@
+<!-- Key points that build as they are said (a long card, so it reveals in stages). Card 13.80-26.80 s.
+     Title on "two options" (13.98), option 1 on "open a Net30" (15.92), its detail on "like ULINE" (17.62),
+     option 2 on "get a secured" (21.98, option 1 dims), its detail on "Use it for" (23.84). -->
+<div class="c02">
+  <div class="c02-t disp">Two ways to start</div>
+  <div class="c02-i" id="c02a">
+    <div class="c02-ic">[[icon:package]]</div>
+    <div><div class="c02-h">Net30 vendor account</div><div class="c02-s" id="c02as">Like Uline · reports to the bureaus</div></div>
+  </div>
+  <div class="c02-i" id="c02b">
+    <div class="c02-ic">[[icon:credit-card]]</div>
+    <div><div class="c02-h">Secured business card</div><div class="c02-s" id="c02bs">Small buys · paid off every month</div></div>
+  </div>
+</div>
+<style>
+.c02{position:absolute;left:7%;right:7%;top:38%;box-sizing:border-box;padding:calc(var(--u)*.055) calc(var(--u)*.06);
+ background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--glow)}
+.c02-t{font-size:calc(var(--u)*.072);line-height:1.05;margin-bottom:calc(var(--u)*.035)}
+.c02-i{display:flex;align-items:center;gap:calc(var(--u)*.035);padding:calc(var(--u)*.026) 0;border-top:1px solid var(--line)}
+.c02-ic{flex:0 0 auto;width:calc(var(--u)*.11);height:calc(var(--u)*.11);border-radius:calc(var(--u)*.028);
+ background:var(--tile);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*.056)}
+.c02-h{font-weight:600;font-size:calc(var(--u)*.048);letter-spacing:-0.015em;line-height:1.15}
+.c02-s{color:var(--muted);font-size:calc(var(--u)*.034);margin-top:.25em;letter-spacing:-0.005em}
+</style>
+<script>
+tl.fromTo(".c02",{opacity:0,y:40,filter:"blur(14px)"},{opacity:1,y:0,filter:"blur(0px)",duration:0.6,ease:"expo.out"},0.0);
+tl.fromTo("#c02a",{opacity:0,y:24},{opacity:1,y:0,duration:0.5,ease:"expo.out"},1.95);
+tl.fromTo("#c02as",{opacity:0},{opacity:1,duration:0.4,ease:"power2.out"},3.7);
+tl.fromTo("#c02b",{opacity:0,y:24},{opacity:1,y:0,duration:0.5,ease:"expo.out"},8.05);
+tl.to("#c02a",{opacity:0.4,duration:0.4,ease:"power2.out"},8.05);
+tl.fromTo("#c02bs",{opacity:0},{opacity:1,duration:0.4,ease:"power2.out"},9.9);
+</script>

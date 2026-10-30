@@ -124,13 +124,13 @@ How this beat hands off to the next. Specify the type and parameters.
 - Zoom through: exit `scale:1→1.2, blur:20px, 0.2s power3.in` → entry `scale:0.75→1, blur:20px→0, 0.5s expo.out`
 - Hard cut / smash cut (for rapid-fire sequences)
 
-**Shader transitions** (choose from `skills/hyperframes/references/transitions/shader-transitions.md`):
+**Shader transitions** (these are registry blocks: `npx hyperframes catalog --tag shader --type block --json`, then `npx hyperframes add <name>` (see the `hyperframes-registry` skill)):
 
 - Cross-Warp Morph (organic, versatile) — 0.5-0.8s, power2.inOut
 - Cinematic Zoom (professional momentum) — 0.4-0.6s, power2.inOut
 - Gravitational Lens (otherworldly) — 0.6-1.0s, power2.inOut
 - Glitch (aggressive, high energy) — 0.3-0.5s
-- See `skills/hyperframes/references/transitions/shader-setup.md` for the full WebGL boilerplate
+- Each block ships its own WebGL setup; read its code before using it
 
 **How velocity-matched CSS transitions work:**
 Exit the outgoing beat with an accelerating ease (power2.in or power3.in) plus a blur ramp. Enter the incoming beat with a decelerating ease (power2.out or power3.out) plus blur clear. The fastest point of both easing curves meets at the cut — the viewer perceives continuous camera motion, not two discrete animations. Match exit velocity to entry velocity within ~5% tolerance.

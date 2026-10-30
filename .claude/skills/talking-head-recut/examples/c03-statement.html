@@ -1,0 +1,20 @@
+<!-- Full-screen statement (spec "mode": "cutaway"): the payoff line, keynote style. Card 27.80-30.60 s.
+     "In about" on "in about" (27.96), the number on "90" (28.28), the line on "you will have" (28.90). -->
+<div class="c03">
+  <div class="c03-a">In about</div>
+  <div class="c03-n disp">90 days</div>
+  <div class="c03-b">you'll have a business credit score.</div>
+</div>
+<style>
+.c03{position:absolute;left:8%;right:8%;top:0;bottom:22%;display:flex;flex-direction:column;align-items:center;
+ justify-content:center;text-align:center}
+.c03-a{color:var(--muted);font-weight:600;font-size:calc(var(--u)*.05);letter-spacing:-0.015em}
+.c03-n{font-size:calc(var(--u)*.2);line-height:1;white-space:nowrap;margin:calc(var(--u)*.02) 0 calc(var(--u)*.035);
+ background:linear-gradient(100deg,#2997ff 10%,#a971ff 90%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.c03-b{color:var(--text);font-weight:600;font-size:calc(var(--u)*.054);line-height:1.2;letter-spacing:-0.02em;max-width:14em}
+</style>
+<script>
+tl.fromTo(".c03-a",{opacity:0,y:20},{opacity:1,y:0,duration:0.5,ease:"expo.out"},0.05);
+tl.fromTo(".c03-n",{opacity:0,scale:1.25,filter:"blur(10px)"},{opacity:1,scale:1,filter:"blur(0px)",duration:0.5,ease:"expo.out"},0.35);
+tl.fromTo(".c03-b",{opacity:0,y:20},{opacity:1,y:0,duration:0.5,ease:"expo.out"},1.0);
+</script>

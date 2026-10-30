@@ -19,6 +19,11 @@ Users often name the effects they want in a word or two, so map their words to s
 | pop, emphasis, highlights, kinetic, text effects, typing, key words | `kinetic-text` |
 | chart, graph, stats, numbers, morph, shapes, check / X, visualize | `morph-shapes` |
 | captions, subtitles, subs, words on screen, srt | `captions` |
+| flowchart, diagram, explainer, how it works, steps, tips list, compare, vs, quote, chapter, title card, intro card, hook, label, callout, lower third, name bar, circle / underline something, end card, save / follow card, template, theme, "like this reel" | `motion-templates` (themes: blueprint, midnight, paper, apple) |
+| text behind me, word behind my head, depth text, cutout title, magazine-cover title, parallax title, "MrBeast / Ali Abdaal style big word" | `text-behind` (local; 1 or 2 moments of about 2 s; slow background removal) |
+| smooth, Apple-smooth, easing, timing, "too bouncy", "feels cheap" | `cut-the-curve`: exact motion numbers for cards, templates, kinetic text and charts |
+| sound effects, sfx, whoosh, pop, swoosh, clicks, "add sounds", sound design, "make it punchier" | `sound-effects`: free sounds placed on the graphics, timed to the frame |
+| direct, director, designed / custom graphics, cards, stat callouts, Apple style, clean, premium, keynote, "the templates look generic" | `talking-head-recut`: plan every card to the word, show the plan, then design and render each card |
 | reel, short, TikTok, vertical, 9:16 | a quick crop: the reframe recipe in `references/editing-recipes.md`. A designed short: `short-form-edit`. |
 | story, beats, glass cards, style library, Herk edit | Herk Edit Kit: `edit-video`, `video-storytelling`, `style-library` (see `CLAUDE.md` and `docs/EDITING-PLAYBOOK.md`) |
 
@@ -26,8 +31,9 @@ Whatever the user picks runs in this fixed order. Each step writes to `work/`, a
 
 1. dead air
 2. mistakes
-3. morph graphics and kinetic text: choose the graphics first, then keep the kinetic text clear of them
-4. captions, always last
+3. templates, designed cards, morph graphics and kinetic text: direct them in one plan (`talking-head-recut`), templates and cards first, then the charts, then kinetic text kept clear of all of them
+4. sound effects on the graphics (`sound-effects`)
+5. captions, always last
 
 Captions go last so their timing matches the final cut and they sit on top. When graphics are in the video, pass their time windows to `--hide-during` so captions don't cover them. Dead air is cut first by default because it's this folder's main job; skip it when the user says the video is already edited.
 

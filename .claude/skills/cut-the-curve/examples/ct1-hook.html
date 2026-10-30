@@ -1,0 +1,55 @@
+<!-- Hook title over the top of a vertical video. Recipes 3, 8 and 4 of cut-the-curve: a waterfall entry,
+     a word-by-word waterfall cut to the second line, then a nudge that makes room for a pill.
+     Said: "Your score is lying. ... Here's the fix. It takes two minutes." Card 0.00-4.00 s.
+     The cut lands at 1.90 on "Here's"; the nudge starts at 2.60 and the pill shows during its burst. -->
+<div class="ct1">
+  <div class="ct1-row">
+    <div class="ct1-l"><span class="ct1-w" id="ct1a1">Your</span> <span class="ct1-w" id="ct1a2">score</span> <span class="ct1-w" id="ct1a3">is</span> <span class="ct1-w" id="ct1a4">ly</span><span class="ct1-w" id="ct1a5">ing</span><span class="ct1-w" id="ct1a6">.</span></div>
+    <div class="ct1-l"><span class="ct1-w" id="ct1b1">Here's</span> <span class="ct1-w" id="ct1b2">the</span> <span class="ct1-w acc" id="ct1b3">fix.</span></div>
+  </div>
+  <div class="ct1-pill pill">Takes 2 minutes</div>
+</div>
+<style>
+.ct1{position:absolute;left:7%;right:7%;top:9%;text-align:center}
+.ct1-row{position:relative;height:calc(var(--u)*.09)}
+.ct1-l{position:absolute;inset:0;white-space:nowrap;font-weight:700;font-size:calc(var(--u)*.075);line-height:1.1;letter-spacing:-0.025em}
+.ct1-w{display:inline-block;opacity:0}
+.ct1-pill{display:inline-block;margin-top:calc(var(--u)*.02);font-size:calc(var(--u)*.038);font-weight:600;border-radius:999px;padding:.4em 1em .38em;opacity:0}
+</style>
+<script>
+// 3. Waterfall entry: binary opacity (tl.set), then a power4.out whip up. Weight sets travel and length.
+// F is a sixtieth of a second whatever the render fps; next start = previous start + its duration -/+ frames.
+var F = 1/60, t = 0.10;
+tl.set("#ct1a1",{opacity:1,y:45},t); tl.to("#ct1a1",{y:0,duration:0.15,ease:"power4.out"},t);   // normal word
+t += 0.15 + F;
+tl.set("#ct1a2",{opacity:1,y:80},t); tl.to("#ct1a2",{y:0,duration:0.18,ease:"power4.out"},t);   // anchor: 1 f gap before it
+t += 0.18 - F;
+tl.set("#ct1a3",{opacity:1,y:40},t); tl.to("#ct1a3",{y:0,duration:0.12,ease:"power4.out"},t);   // light: 1 f overlap
+t += 0.12 - F;
+tl.set("#ct1a4",{opacity:1,y:70},t); tl.to("#ct1a4",{y:0,duration:0.16,ease:"power4.out"},t);   // final word, split
+t += 0.16 - F;
+tl.set("#ct1a5",{opacity:1,y:70},t); tl.to("#ct1a5",{y:0,duration:0.15,ease:"power4.out"},t);
+t += 0.15 - 2*F;
+tl.set("#ct1a6",{opacity:1,y:48},t); tl.to("#ct1a6",{y:0,duration:0.12,ease:"power4.out"},t);   // punctuation snaps
+
+// 8. Waterfall cut at C: old words accelerate left and fade early; new words ignite mid-path at 0.35.
+var C = 1.90, s = C - 0.32;
+["#ct1a1","#ct1a2","#ct1a3","#ct1a4","#ct1a5","#ct1a6"].forEach(function (w) {
+  tl.to(w,{x:"-12vw",duration:0.34,ease:"power4.in"},s);
+  tl.to(w,{opacity:0,duration:0.18,ease:"power1.in"},s);
+  s += 0.022;
+});
+var off = 0, gap = 0.05;
+["#ct1b1","#ct1b2","#ct1b3"].forEach(function (w) {
+  tl.set(w,{opacity:0.35,x:"12vw"},C + off);
+  tl.to(w,{opacity:1,x:0,duration:0.3,ease:"power4.out"},C + off);
+  off += gap; gap *= 0.84;
+});
+
+// 4. Nudge curve: the group moves up 65 px slow-fast-slow (10% / 65% / 25% of the way); the pill shows in the burst.
+var n = 2.60;
+tl.to(".ct1",{y:-7,duration:0.12,ease:"power3.in"},n);
+tl.to(".ct1",{y:-49,duration:0.10,ease:"none"},n + 0.12);
+tl.to(".ct1",{y:-65,duration:0.35,ease:"power4.out"},n + 0.22);
+tl.fromTo(".ct1-pill",{opacity:0,y:24},{opacity:1,y:0,duration:0.5,ease:"expo.out"},n + 0.12);
+</script>

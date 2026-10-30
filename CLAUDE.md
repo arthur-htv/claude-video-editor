@@ -29,6 +29,11 @@ One keyword is enough to choose a skill ("captions", "highlights", "chart", "ret
 | Captions / subtitles | `captions` |
 | Kinetic text on the emphasized words | `kinetic-text` |
 | Morphing shapes, animated charts, check / X moments | `morph-shapes` |
+| Flowchart explainers, steps, comparisons, quotes, chapter / hook / end cards, label tags, themes | `motion-templates` |
+| Directed, designed or Apple-style graphics: plan each card to the word, approve, then design and render it | `talking-head-recut` |
+| One big word behind the speaker, cut out in front ("text behind me", depth text) | `text-behind` |
+| Sound effects (whoosh, pop, click, impact) on the graphics, "make it punchier" | `sound-effects` |
+| Smooth / Apple-like motion, easing and timing, "too bouncy", "feels cheap" | `cut-the-curve` (exact GSAP numbers for every card, template, kinetic word and chart) |
 | Full Herk-style edit of a raw talking-head (cuts, mistakes, story, motion graphics) | `edit-video` |
 | Reels, Shorts, short ads | `short-form-edit` |
 | Remove retakes, stutters, false starts | `cut-mistakes` (after `cut-silences`) |
