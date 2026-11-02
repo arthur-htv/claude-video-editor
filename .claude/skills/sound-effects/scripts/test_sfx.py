@@ -72,6 +72,11 @@ tl.fromTo(".n",{opacity:0,scale:0.92,filter:"blur(16px)"},{opacity:1,scale:1,fil
 e = card_events({"template": "card", "start": 0, "end": 3, "mode": "cutaway", "html": cut}, "c10")
 assert [(x["sel"], x["family"]) for x in e] == [(".a", "whoosh"), (".n", "impact")], e
 
+# The cap: each graphic's lead hit comes before a card's later pops, so no graphic goes silent (12 s: cap 3).
+card = [dict(ev(1.0 + i, "whoosh" if i == 0 else "pop"), graphic=0) for i in range(4)]
+kept = select(card + [dict(ev(8.0, "pop"), graphic=1), dict(ev(10.0, "tap"), graphic=2)], 12, 15)
+assert [k["t"] for k in kept] == [1.0, 8.0, 10.0], kept
+
 # The real sounds: present only after setup's npm install, so this part needs node_modules.
 if (project_root() / SFX_REL / "manifest.json").is_file():
     from add_sfx import filter_graph

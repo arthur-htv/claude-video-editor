@@ -28,7 +28,10 @@ from vtools import find_tool, fmt_time, probe, project_root  # noqa: E402
 
 import numpy as np  # noqa: E402
 
-NUMBER = re.compile(r"\d|%|\$|€|£|\bhalf\b|\bdouble\b|\btriple\b|\bten\b|\bhundred\b|\bthousand\b|\bmillion\b|\bbillion\b", re.I)
+# Whisper writes small numbers as words ("six months"). "one" is left out: it is mostly "the one thing", "one of"
+NUMBER = re.compile(r"\d|%|\$|€|£|\b(half|double|triple|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve"
+                    r"|(thir|four|fif|six|seven|eigh|nine)teen|(twen|thir|for|fif|six|seven|eigh|nine)ty|hundred|thousand"
+                    r"|million|billion)\b", re.I)
 ABSOLUTE = set("""never always every everything nothing nobody only best worst biggest fastest easiest secret
 must stop instantly guaranteed zero free forever impossible""".split())
 CONTRAST = set("but actually instead however except unless".split())

@@ -35,7 +35,7 @@ Folder contract as in the `video-editor` skill. `PY` = `.venv/Scripts/python.exe
    - `--mode cutaway` (default): the graphic fills the screen for `--duration` seconds (default 4) while the voice continues, like a B-roll shot. This is the clearest option for charts.
    - `--mode overlay`: a dark glass panel beside the speaker. The side is chosen away from the face; in vertical video it goes above or below the face.
 
-   Find `--at` from the transcript (`work/<name>.words.json`). For charts, use the start of the word that introduces the number, minus about 0.2 s. A `check` or `cross` is complete about 0.75 s after `--at`, so start it about 0.6 s before the word that carries the verdict ("not" in "do not spend", "right" in "the right way"). As an overlay it floats on its own, compact, without a panel; its label sits in a dark box so it reads on any background. A cutaway runs to the end of the sentence it illustrates, between 2.5 and 4 s.
+   Find `--at` from the transcript (`work/<name>.words.json`). For charts, use the start of the word that introduces the number, minus about 0.2 s. A `ring-to-number` reaches its number about 1.9 s after `--at`, so start it about 1.8 s before the number word and give it at least 3 s. A `check` or `cross` is complete about 0.75 s after `--at`, so start it about 0.6 s before the word that carries the verdict ("not" in "do not spend", "right" in "the right way"). As an overlay it floats on its own, compact, without a panel; its label sits in a dark box so it reads on any background. A cutaway runs to the end of the sentence it illustrates, between 2.5 and 4 s.
 3. Check `work/<name>.morph-check.png`, then continue the chain (captions last) or deliver.
 
 ## Customizing

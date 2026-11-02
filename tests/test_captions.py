@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / ".claude/skills/captions/scripts"))
-from make_captions import hide_during, plan_captions  # noqa: E402
+from make_captions import hide_during, named_y, plan_captions  # noqa: E402
 
 
 def w(word, start, end):
@@ -26,5 +26,8 @@ words = [w("two,", 21.28, 21.56), w("get", 21.98, 22.14), w("a", 22.14, 22.26), 
 plan = plan_captions(words, "hand", 30, True)
 assert sum(len(c["words"]) for c in plan) == len(words), plan
 assert not any(c["text"].lower() == "get" for c in plan), [c["text"] for c in plan]
+
+# --position: named places (bottom sits higher on a vertical video) or a share of the height
+assert (named_y("bottom", True), named_y("bottom", False), named_y("top", True), named_y("0.7", True)) == (0.78, 0.86, 0.16, 0.7)
 
 print("captions: all checks pass")

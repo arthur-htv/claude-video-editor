@@ -52,13 +52,13 @@ These videos have a voice and usually no music, so levels are set against the **
 ## Keeping it sparse
 
 - **No stacking:** two hits less than 0.6 s apart become one, and the stronger family wins. The order of strength is impact, then whoosh, then pop, then tick and tap.
-- **A cap per minute:** 15 by default, prorated under a minute (8 in a 33 s video). Use 8 for long videos. The strongest hits are kept first.
+- **A cap per minute:** 15 by default, prorated under a minute (8 in a 33 s video). Use 8 for long videos. Each graphic's first hit is kept first, then the strongest of the rest, so a card's third tick never takes the only sound of another graphic. The printout names any graphic left without a sound ("No room left for a sound on ..."): raise `--per-minute`, or swap a cue by hand.
 - **Rotation:** each family's takes rotate in time order, so no two cues in a row are identical.
 
 ## Commands
 
 ```
-PY SFX/suggest_sfx.py V --templates work/<name>.templates.json [--emphasis work/<V-stem>.emphasis.json] \
+PY SFX/suggest_sfx.py V --templates work/<name>.templates.json [--emphasis work/<name>.emphasis.json] \
    [--morph "2.9-5.9,8.2-10.8"] [--words W] [--per-minute 15] [--level 0]      # writes work/<name>.sfx.json
 PY SFX/add_sfx.py V --plan work/<name>.sfx.json --out work/<name>.s.mp4 [--hf-check]  # V = work/<name>.s.mp4
 ```

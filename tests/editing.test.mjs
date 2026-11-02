@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve, join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -48,6 +48,30 @@ test('out-of-source cuts fail instead of corrupting the edit timeline', () => {
   const result = run(apply, [fixture, '--cuts', cuts, '--out-dir', out]);
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /range|duration|bounds/i);
+});
+
+test('a typo in the hand-written cuts file gets a plain message, not a stack trace', () => {
+  const out = scratch(), cuts = join(out, 'cuts.json');
+  writeFileSync(cuts, '{"cuts":[{"start":1,"end":2},]}');
+  const result = run(apply, [fixture, '--cuts', cuts, '--out-dir', out]);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /cuts\.json isn't valid JSON .*Fix it, then run this again\./);
+  assert.doesNotMatch(result.stderr, /at JSON\.parse/);
+});
+
+// [claude-video-editor patch] a later pass is shorter than the transcript's video: refused before anything is cut
+const ffbin = join(root, 'tools/ffmpeg/bin');
+const ffmpeg = [join(ffbin, 'ffmpeg.exe'), join(ffbin, 'ffmpeg')].find(existsSync);
+test('a video of another length than the transcript is refused', { skip: !ffmpeg && 'no ffmpeg in tools/' }, () => {
+  const out = scratch(), cuts = join(out, 'cuts.json'), clip = join(out, 'later.mp4');
+  writeFileSync(cuts, '{"cuts":[{"start":0.6,"end":0.9}]}');
+  const made = spawnSync(ffmpeg, ['-v', 'error', '-f', 'lavfi', '-i', 'color=c=black:s=64x64:d=2', '-f', 'lavfi', '-i', 'anullsrc', '-t', '2', clip]);
+  assert.equal(made.status, 0, String(made.stderr));
+  const env = { ...process.env, PATH: `${ffbin}${process.platform === 'win32' ? ';' : ':'}${process.env.PATH}` };
+  const result = spawnSync(process.execPath, [join(root, apply), fixture, '--cuts', cuts, '--video', clip, '--out-dir', out, '--apply'], { encoding: 'utf8', cwd: root, env });
+  assert.equal(result.status, 1, result.stderr);
+  assert.match(result.stderr, /later\.mp4 is 2\.\d+ s long, but the transcript is from a 8\.00 s video/);
+  assert.ok(!existsSync(join(out, 'later.mistakes-cut.mp4')));
 });
 
 test('beat validator accepts reordered attributes and enforces early and late limits', () => {

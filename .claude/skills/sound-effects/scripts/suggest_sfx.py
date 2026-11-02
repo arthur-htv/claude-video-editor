@@ -237,14 +237,21 @@ def load_words(path: Path | None) -> list[dict]:
 
 def select(events: list[dict], duration: float, per_minute: float, min_gap: float = MIN_GAP) -> list[dict]:
     """Keep the strongest hits: none within min_gap of another, at most per_minute in any minute
-    (prorated for videos under a minute). One impact per video: the last statement, the payoff."""
+    (prorated for videos under a minute). One impact per video: the last statement, the payoff. Each graphic's
+    lead hit (events with the same "graphic" belong to one) goes first, so a card's third tick never silences
+    another graphic."""
     impacts = [e for e in sorted(events, key=lambda e: e["t"]) if e["family"] == "impact"]
     for e in impacts[:-1]:
         e["family"] = "whoosh"
     window = min(60.0, max(duration, 1.0))
     cap = max(1, round(per_minute * window / 60))
+    lead: dict = {}
+    for e in events:
+        key, g = (FAMILIES[e["family"]][2], e["t"]), e.get("graphic", id(e))
+        lead[g] = min(lead.get(g, key), key)
     kept: list[dict] = []
-    for e in sorted(events, key=lambda e: (FAMILIES[e["family"]][2], e["t"])):
+    for e in sorted(events, key=lambda e: (lead[e.get("graphic", id(e))] != (FAMILIES[e["family"]][2], e["t"]),
+                                           FAMILIES[e["family"]][2], e["t"])):
         if not 0.05 <= e["t"] <= duration - 0.1 or any(abs(e["t"] - k["t"]) < min_gap - 1e-6 for k in kept):
             continue
         times = sorted([k["t"] for k in kept] + [e["t"]])
@@ -293,7 +300,7 @@ def main() -> int:
         specs = sorted(data if isinstance(data, list) else [data], key=lambda s: float(s["start"]))
     morph = parse_windows(args.morph)
 
-    events = [e for s in specs for e in template_events(s)]
+    events = [dict(e, graphic=i) for i, s in enumerate(specs) for e in template_events(s)]
     for t, _ in morph:  # the first shape scales in at 0.1-0.15 s over 0.4 s (back.out): 80% in at ~0.25 s
         events.append({"t": t + 0.25, "family": "pop", "why": f"chart at {t:g} pops in"})
     if args.emphasis:
@@ -304,6 +311,8 @@ def main() -> int:
                            "why": f"kinetic \"{m.get('text', '')}\" ({m.get('style', 'pop')})"})
 
     cues = select(events, info.duration, args.per_minute)
+    silent = sorted({min((e for e in events if e.get("graphic", id(e)) == g), key=lambda e: e["t"])["why"]
+                     for g in {e.get("graphic", id(e)) for e in events} - {c.get("graphic", id(c)) for c in cues}})
     assign_takes(cues)
     speech = speech_level(args.video)
     cutaways, words = cutaway_windows(specs, morph), load_words(args.words)
@@ -333,6 +342,8 @@ def main() -> int:
           f"(at most {args.per_minute:g} a minute, {MIN_GAP} s apart).")
     for c in plan:
         print(f"  {c['at']:7.2f}s  {c['sound']:<14} {c['gain_db']:+6.1f} dB  {c['why']}")
+    if silent:
+        print(f"No room left for a sound on: {'; '.join(silent)} (raise --per-minute, or swap a cue by hand).")
     print(f"Plan: {out}  (edit or remove cues, then run add_sfx.py)")
     return 0
 

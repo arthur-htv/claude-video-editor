@@ -65,7 +65,7 @@ Good to know:
 - **Nothing is installed system-wide and no admin rights are needed.** Whatever is missing goes inside this folder.
 - Every download is checked against its published checksum before it is used.
 - The first run downloads about 1 GB and takes 3 to 5 minutes. Running the setup again is safe and quick: finished steps are skipped.
-- Disk space: plan for about 2 GB. The first time you make captions, the speech model adds about 0.5 GB (in `tools/models/`). `tools/uv-cache/` is only a download cache: deleting it frees space and doesn't break anything.
+- Disk space: plan for about 5 GB. The first time you make captions, the speech model adds about 0.5 GB, and the first automatic edit adds the larger re-listen model, about 3 GB (both in `tools/models/`). `tools/uv-cache/` is only a download cache: deleting it frees space and doesn't break anything.
 - **Check what's installed** without changing anything: `setup.ps1 -Check` (Windows) or `bash setup.sh --check` (macOS / Linux).
 - Want everything self-contained even though your computer already has some of these tools? Add `-ForcePortable` (Windows) or `--force-portable` (macOS / Linux).
 
@@ -96,21 +96,23 @@ Long videos take a while: rendering runs at roughly real-time speed or faster fo
 
 1. cuts the dead air
 2. transcribes it and reads what you say
-3. cuts repeated phrases and retakes
-4. turns the numbers you mention into morphing charts (bar chart for a comparison, counting ring for a percentage, check / X for a verdict)
-5. adds templates where they fit:
+3. cuts repeated phrases and retakes, then listens to every cut again to make sure no word was clipped
+4. sets your voice to the level the apps play speech at
+5. punches in on the jump cuts (short and medium videos)
+6. turns the numbers you mention into morphing charts (bar chart for a comparison, counting ring for a percentage, check / X for a verdict)
+7. adds templates where they fit:
    - a flowchart explainer that builds itself while you walk through a process
    - numbered steps for tips
    - a comparison for this vs that
    - a hook title at the start
    - a save / follow card at the end
-6. puts kinetic text on the words you stress
-7. adds captions last, keeping them off the graphics
+8. puts kinetic text on the words you stress
+9. adds captions last, keeping them off the graphics
 
-It then checks the frames and reports what it added and where. Add notes after the command, e.g. `/video-editor:auto talk.mov no captions` or `/video-editor:auto keywords: Claude, 10x`.
+It then runs a graphics check (fonts, face, captions, spacing), has a fresh pair of eyes look at the check frames once, and reports what it added and where. If a session ends half way, say "continue the edit": Claude picks up from the last finished step. Add notes after the command, e.g. `/video-editor:auto talk.mov no captions` or `/video-editor:auto keywords: Claude, 10x`.
 
 How much it adds depends on the video:
-- **Vertical or under 90 s:** tight cuts and reel captions.
+- **Vertical or under 90 s:** tight cuts, punch-ins on the cuts, and captions in the theme's style.
 - **Long horizontal videos:** fewer graphics, plus clean subtitles and an `.srt` file.
 
 It never invents a number: no numbers spoken means no charts.
@@ -142,6 +144,8 @@ Watch the first video, then tell Claude what to change:
 | (default) | `normal` | cuts pauses longer than 0.6 s, keeps 0.15 s of air |
 | "tighter", "snappier", "for TikTok" | `tight` | cuts pauses longer than 0.35 s, keeps 0.1 s of air |
 | "words are getting cut off" | more padding | keeps more air around every word |
+| "gentler punch-ins", "no zooms" | punch-ins at 108%, or none | the framing changes less on each cut, or not at all |
+| "put that cut back", "cut that part too", "make it tighter" after the graphics | the re-cut, then `retime.py` | the graphics, sounds and captions move with the cut and stay on their words |
 
 The silence level adapts to each recording, so quiet rooms and noisy rooms both work. One limit: background music under the voice makes pauses hard to detect (music is never silent). Claude warns you when it sees that.
 
@@ -166,7 +170,7 @@ Claude picks the right skill from what you ask. You can also call one by name (t
 
 | Skill | Use it for | Try saying |
 |---|---|---|
-| `/video-editor:auto` | The automatic edit: scans each video and adds what fits (dead-air cut, retake cuts, morph charts, kinetic text, captions) | "auto edit", "do everything", "make it engaging" |
+| `/video-editor:auto` | The automatic edit: scans each video and adds what fits (dead-air cut, retake cuts, voice level, punch-ins on the cuts, morph charts, kinetic text, captions), then checks the graphics | "auto edit", "do everything", "make it engaging" |
 | `video-editor` | Cutting dead air, plus everyday edits: trim, join, vertical, music, logo, compress. Also turns single keywords ("captions", "highlights", "chart") into the right skills. | "edit my videos", "make it tighter" |
 | `captions` | Burned-in captions in the playbook's reel style (1-3 words, dark box, colored keywords, never over the mouth), one-word captions, or clean subtitles + `.srt` | "add captions", "subtitles for YouTube" |
 | `kinetic-text` | Animated text only on the words you stress, numbers and names (pop, slam, typewriter, highlight, stack), spaced out so there's no clutter | "make the key points pop", "add kinetic typing on the important words" |
@@ -191,9 +195,12 @@ How Nate's videos are edited with these skills (the order, the numbers, the capt
 `/video-editor:auto` does all of this by itself. To steer each step yourself:
 
 1. "Cut the dead air" (`video-editor`), or for a reel "use short-form-edit".
-2. "Show me the retakes and stutters to cut" (`cut-mistakes`). You approve each cut.
-3. "Make a flowchart of the steps" or "add a hook title" (`motion-templates`), "make the key points pop" (`kinetic-text`), and "show the numbers as charts" (`morph-shapes`).
-4. "Add captions" (`captions`). Captions go last, so they match the final timing.
+2. "Show me the retakes and stutters to cut" (`cut-mistakes`). You approve each cut. Then "re-listen to the cuts" (`video-editor`): every join is heard again, so no word is clipped.
+3. "Even out the volume" (`video-editor`): your voice goes to -14 LUFS.
+4. "Punch in on the jump cuts" (`video-editor`): the framing switches between full and 112% at each cut.
+5. "Make a flowchart of the steps" or "add a hook title" (`motion-templates`), "make the key points pop" (`kinetic-text`), and "show the numbers as charts" (`morph-shapes`).
+6. "Add captions" (`captions`). Captions go last, so they match the final timing.
+7. "Check the graphics" (`video-editor`): fonts, face, captions and spacing.
 
 Each step saves to `work/`; only the finished video lands in `output/`.
 
@@ -226,6 +233,10 @@ python .claude/skills/video-editor/scripts/cut_dead_air.py --analyze       # pre
 python .claude/skills/video-editor/scripts/cut_dead_air.py --preset tight input/talk.mov
 python .claude/skills/video-editor/scripts/cut_dead_air.py --help          # every option
 python .claude/skills/video-editor/scripts/transcribe.py output/talk.mp4   # captions -> output/talk.srt
+python .claude/skills/video-editor/scripts/relisten.py work/talk.clean.mp4 --words work/talk.mistakes-transcript.json   # re-hear every join
+python .claude/skills/video-editor/scripts/voice_level.py work/talk.mp4 --out output/talk.mp4   # voice to -14 LUFS, peaks at or under -2 dBTP (add --overwrite to redo)
+python .claude/skills/video-editor/scripts/punch_in.py work/talk.mp4 --name talk   # punch-ins on the jump cuts -> work/talk.p.mp4
+python .claude/skills/video-editor/scripts/qa_graphics.py talk   # check the graphics: fonts, face, captions, spacing (add --platform reels only for an ad on that app)
 python .claude/skills/video-editor/scripts/hf.py doctor                    # HyperFrames health check
 python .claude/skills/captions/scripts/make_captions.py work/talk.mp4      # reel captions -> output/talk.mp4
 python .claude/skills/kinetic-text/scripts/find_emphasis.py work/talk.mp4  # pick emphasis moments
@@ -244,7 +255,7 @@ FFmpeg is in `tools/ffmpeg/bin/` when the setup installed it. The FFmpeg command
 claude-video-editor/
 ├── input/                 your raw videos (never changed)
 ├── output/                finished videos
-├── work/                  scratch files and reports (safe to empty)
+├── work/                  scratch files, reports and each edit's run file (safe to empty)
 ├── README.md              this guide
 ├── CLAUDE.md              instructions Claude reads at the start of every session
 ├── AGENTS.md, MOTION_PHILOSOPHY.md   Herk Edit Kit workspace guide and motion rules
@@ -313,6 +324,29 @@ Before you push changes, run `git status` and check that no video, API key or `.
 | Words are cut off | Ask for "more natural" (`gentle`) or "more padding". |
 | Hardly anything was cut | The video may have background music or constant noise, or few real pauses. Claude reports the noise level and can set the silence level by hand. |
 | A long video stopped halfway | Ask Claude to run it in the background; very long renders can outlast a single command. |
+| A new session started the edit over, or doesn't know where it stopped | Say "continue the edit". Claude reads `work/<name>.run.json` and carries on from the first unfinished step. Emptying `work/` deletes it, so the next edit starts from the beginning. |
+| Claude says the source changed since the run started | The video in `input/` was replaced by another one with the same name. Claude starts that edit over, so nothing from the old video is reused. |
+| "cutting the mistakes failed" when cutting mistakes | Read the line above it. If it says "The project's Python (.venv) was not found", run the setup again. The last cut list is left as it was. |
+| An approved mistake cut was "left out" | It sat inside a word that is mostly kept. Widen it to the whole word (from that word's start to the next word's start), or drop it. |
+| "no quiet point between the words" when cutting mistakes | The words there run together, so that cut keeps the edges you approved instead of moving to a quiet spot. The re-listen step checks that join. |
+| "note: reports/<name>.json could not be read" when cutting mistakes | The dead-air report next to the video is damaged. Run the dead-air step again with `--overwrite` (without it, the step keeps the video it already made and leaves the report as it is), then the mistake step. |
+| A few frames of a removed take show right after a jump cut | A dead-air run that failed after the dead-air render replaced the report the mistake step reads. Run the dead-air render again with `--overwrite`, then the mistake step. |
+| "WARNING: the cut video is N ms longer/shorter than the kept pieces" when cutting mistakes | Rare. The cut is still usable, but graphics timed from it may be off by that much. Note which clip it was. |
+| The re-listen step lists a problem at a join | A cut goes through a word, or left part of a cut word in. Ask Claude to move that cut once, or to put it back. If it is still flagged after one move, it stays and the report names it. |
+| The re-listen step prints "Notes, nothing to change" | The speech model heard a word differently next to a cut, but the cut does not touch that word. Nothing to do. |
+| The re-listen step says "unheard" at a join | The speech model heard nothing there, so that join was not checked. Run it again; if it stays, listen to that join yourself. |
+| The voice level says MISSED | Reaching -14 LUFS would have made the limiter take more than 5 dB off the whole voice, which flattens it (common with computer voices). It stops lower and prints the level it reached. Accept that level with the `--target` it suggests, or ask Claude to leave the volume as it was. |
+| Punch-ins stop with "This video is as long as the dead-air cut" | A mistake list from an earlier run is still in `work/`. Run punch-ins on the video made from the mistake cut (`work/<name>.v.mp4`, or `work/<name>.clean.mp4` if the voice level was skipped). If step 4 cut nothing this time, move `work/<name>.mistakes-edl.json` out of `work/` instead. |
+| The graphics check says a font isn't bundled | The card asks for a font this folder doesn't ship, before any bundled one, so the render quietly used another. Put Inter, Montserrat XB, Abril Fatface or Architects Daughter first in the list. |
+| The graphics check fails every caption with `--platform` | The apps' ad safe zones keep the bottom 35% of the frame clear, and bottom captions sit at 78%. For an organic post, leave out `--platform`. To follow the zones, move the captions up with `make_captions.py --position 0.6`. TikTok's buttons also cover the right side of the frame from 44% of the height down, so a caption line wider than about 44% of the frame fails there at any height: for TikTok, also add `--scale 0.65`. |
+| The graphics check says "has no rendered clip" | The plan changed after the render (a new start time or title). Render that pass again with `--overwrite`. |
+| The graphics check says a clip "can't be read" | That render stopped part way and left an empty or broken file. Render that pass again with `--overwrite`. |
+| The graphics check notes a morph graphic was checked for timing only | No morph clip of that length was rendered for this video after its dead-air cut, or there are fewer clips than morph graphics and their names don't say which is which. Render the missing morph graphic again. |
+| The graphics check stops with "isn't valid JSON" | A plan was damaged by a hand edit. The message names the file: fix it, or make it again with the step that wrote it. |
+| "The mistake cuts were made on a ... dead-air cut" when the plans move | You changed the pacing after cutting mistakes, so those cuts are timed on the old dead-air cut. Ask Claude to run the transcription and mistakes steps again, then move the plans. |
+| "nothing to move" right after you changed the cut | The re-cut didn't happen: the dead-air step keeps a video it already made unless it gets `--overwrite`. Ask Claude to redo the re-cut with `--overwrite`, then move the plans. |
+| "The plans in work/ are timed on the cut saved in ..." | The cut was saved again after it changed. Ask Claude to move the plans (`retime.py <name>`) instead. To plan the graphics again from scratch, delete `work/<name>.cutmap.json` first. |
+| "kinetic text ... now runs over words put back" | A cut you put back sits inside a kinetic text or text-behind moment, so its words are now said under it. Look at that moment and shorten or re-plan it if the repeat shows. |
 | HyperFrames render fails | Run `python .claude/skills/video-editor/scripts/hf.py doctor`. Rendering titles needs an internet connection (the animation library loads from a CDN). On Linux, the headless Chrome may need extra system libraries; `doctor` lists them. |
 | Start over completely | Delete `tools/`, `.venv/` and `node_modules/`, then run the setup again. |
 
@@ -325,6 +359,26 @@ Delete the folder. Two things HyperFrames keeps outside the folder, which you ca
 
 ## Changelog
 
+- **2026-11-02 (a sturdier automatic edit):**
+  - Mistake cuts (`cut-mistakes`, step 4 of `/video-editor:auto`) now join as cleanly as dead-air cuts. Each edge is measured on the waveform and lands on the quietest frame near the word, never inside a word you keep. When the words run together and the quietest point is inside the word being cut, the cut keeps the edges you approved and says so. The frames are read from the video file itself, so phone clips with a variable frame rate, and clips whose picture starts a moment after the sound, stay frame-exact too. When a dead-air cut sits in the same pause, the edge moves onto it, even when the transcript puts the next word a hair before it, so no frame of the removed take flashes between two jump cuts. Every join gets a short fade, and the video goes through the same encoder and length check as the dead-air cut (HDR stays HDR). The saved timings match the finished file to the frame. The dead-air report (`work/reports/<name>.json`, and `--json`) now saves its cut times to 9 decimals instead of 3, so the two cut lists line up exactly.
+  - New re-listen step (`relisten.py`, step 4b). After the last cut, the `large-v3` speech model hears about 1.5 s on each side of every join, and also the same places in the uncut video. It hears only around the joins, but on a video cut every few seconds that is most of it: a 48 s clip with 14 joins took about 7 minutes. It lists a word as a problem only when the cut goes through it, leaves part of a cut word in, or adds a word on real sound. Other differences are notes that need no change. Problems are fixed or reported before the graphics. Check it with `.venv/Scripts/python .claude/skills/video-editor/scripts/relisten.py --self-test` (1 s) or `.venv/Scripts/python tests/test_relisten.py` (a few minutes, Windows).
+  - New voice-level step (`voice_level.py`, step 4c): your voice is set to -14 LUFS with one fixed gain, so nothing swells up in the pauses, and a limiter keeps the peaks at or under -2 dBTP so the sound effects still fit. One loud pop doesn't hold the whole voice down: it stops short, and says MISSED, only when reaching -14 would flatten the voice. A voice recorded on one side only now plays on both. The picture is copied, not re-encoded. The volume recipe now uses it instead of one-pass `loudnorm`.
+  - New punch-ins on jump cuts (`punch_in.py`, step 4d). At each cut the picture switches between full and 112%, centred on your face and never cropping it, and each framing stays on screen at least 2 s. Each switch lands on the exact frame of its cut, phone videos included. If the saved cut lists don't fit the video, it stops and says why instead of guessing. The picture is encoded once and the sound is copied untouched. It's on for short and medium videos; say "keep it natural" or "no zooms" to turn it off. Check with `.venv/Scripts/python .claude/skills/video-editor/scripts/punch_in.py --self-test`.
+  - New graphics check before the hand-over (`qa_graphics.py`, step 8). It names the graphic and the time when a font isn't bundled (the render would quietly swap it), a graphic covers the face or a caption, two graphics come less than 0.5 s apart, a full-screen graphic flashes black, a graphic is cut off at the edge, or a rendered clip is damaged. It reads the morph windows from the run file, and its notes say what it couldn't check. For ads on vertical video, `--platform reels`, `tiktok` or `shorts` also keeps graphics and captions out of the app's own buttons and text. Once the check passes, one fresh subagent looks over the check sheets once.
+  - New run file (`run_state.py`). After every step, `work/<name>.run.json` records where the edit is, the current files, the theme and each graphic's time window. A new session reads it and carries on from the next step instead of starting over. The windows that keep kinetic text, captions and sounds off the graphics now come from it, so they are never retyped from memory. Check with `.venv/Scripts/python .claude/skills/video-editor/scripts/run_state.py --self-test`.
+  - New `retime.py`: put back a cut, cut more, or make the pacing tighter or gentler after the graphics are planned, and every graphic, sound effect and caption moves onto the new cut and still lands on the same word, without planning the graphics again. It works from the words saved before the graphics (`retime.py <name> --save`), so neither a fresh transcription nor a longer or shorter pause can shift anything, and each sound stays with its graphic. Anything whose words were cut is dropped and listed, words that come back get captions, and the old plans are kept as `.pre-retime.json`. Check with `.venv/Scripts/python .claude/skills/video-editor/scripts/retime.py --self-test`.
+  - Fixes from a full test edit and a code review:
+    - A re-cut can carry on in a new session: marking a step again takes the marks off every step after it.
+    - A ring chart is dropped when the number it counts to is cut.
+    - A dead-air preview (`--analyze`) no longer replaces the report the mistake step reads.
+    - Under the per-minute cap, every graphic gets its first sound before a card gets a second one, and the printout names any graphic left without a sound.
+    - `--position` now works when captions are burned from a saved plan.
+    - Numbers said as words ("six months") count as numbers for kinetic text.
+    - The mistake step refuses a video whose length doesn't match its transcript, instead of cutting the wrong words.
+    - A damaged cut list gets a plain message naming the file.
+    - Re-listen finds the uncut video after the project folder moved.
+    - A mono voice is levelled the same as a stereo copy of it (about 3 dB lower than before).
+  - One home per rule in the guides: graphic spacing and timing live in `talking-head-recut`, and each theme's caption style lives in `motion-templates/themes/<theme>.json` (`captions`). The other guides point there instead of repeating numbers that could drift apart.
 - **2026-10-30 (more from HyperFrames):**
   - The `hyperframes`, `hyperframes-cli` and `hyperframes-registry` skills now match the pinned HyperFrames CLI (0.8.221; the registry guide is from upstream main). The new guides were merged in next to the old ones, which other skills still use. Each starts with an "In this folder" note: footage edits go through `video-editor`, HeyGen paid and upload features need your OK, and `/video-editor:auto` uses this folder's own templates first.
   - New `cut-the-curve` skill: nine tested motion recipes with exact timing and easing. Cards now enter on `expo.out`, a full-screen payoff lands with an inverse zoom, and the flowchart camera glides slow-fast-slow.

@@ -92,10 +92,11 @@ ffmpeg -y -i work/talk.mp4 -filter_complex "[0:v]setpts=PTS/1.25[v];[0:a]atempo=
 ```
 `atempo` accepts 0.5 to 2.0. Chain two for more (`atempo=2,atempo=1.5`).
 
-**Even out the volume** to the -14 LUFS level YouTube, Instagram and Spotify use (video untouched):
+**Even out the volume** to the -14 LUFS level YouTube, Instagram and Spotify use. One fixed gain for the whole video, so nothing swells up in the pauses. A limiter keeps the peaks at or under -2 dBTP, and a voice recorded on one channel plays on both. The picture is copied, not re-encoded:
 ```
-ffmpeg -y -i work/talk.mp4 -af "loudnorm=I=-14:TP=-1.5:LRA=11" -c:v copy -c:a aac -b:a 192k -ar 48000 output/talk.mp4
+PY .claude/skills/video-editor/scripts/voice_level.py work/talk.mp4 --out output/talk.mp4
 ```
+It prints the level before and after. It says MISSED and stops lower when getting there would flatten the voice (the limiter would take more than 5 dB off it on average, common with computer voices). `--target -16` gives a quieter level (podcasts); `--ceiling -1` allows louder peaks when no sound effects will be added; `--overwrite` replaces an output that is already there. Don't use one-pass `loudnorm` for this: it keeps re-adjusting the level and turns every pause up.
 
 **Background music that ducks under the voice.** The music file goes in `input/`; it loops if it's shorter than the video, and `volume=0.25` sets its level:
 ```

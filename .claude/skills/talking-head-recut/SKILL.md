@@ -62,7 +62,7 @@ Show the table and ask the user to reply OK or change any line. This is the one 
 ## 4. The look
 
 Use one look for the whole video, shared with any templates through `--theme`:
-- **`apple`**: black ground, Inter, one blue accent, dark glass panels, soft shadows. It is the default when the user asks for Apple, clean, premium, minimal or keynote. Captions: `--style apple`.
+- **`apple`**: black ground, Inter, one blue accent, dark glass panels, soft shadows. It is the default when the user asks for Apple, clean, premium, minimal or keynote.
 - **`blueprint`, `midnight`, `paper`**: the motion-templates themes. Cards use the same variables, so they follow along.
 - **A different look:** `references/styles/*.html` holds 10 reference cards: academic, audit, editorial, geom, minimal, spotlight, swiss, terminal, whiteboard and xhs.
   - Take their palette, type scale and ornaments.
@@ -128,4 +128,4 @@ Its spec goes in its own file. This writes `work/previews/tpl-card-*.webm` (an `
 PY T/build_template.py work/<name>.templates.json --video V --theme apple --out work/<name>.t.mp4
 ```
 
-Look at `work/<name>.t.templates-check.png`. Every card should be on its word and readable, with the face and mouth clear, nothing under the captions, and no line wrapping where it shouldn't. Fix the card file and render again (`--overwrite`). Captions go on last: `--style apple --position bottom --hide-during "<full-screen windows>"`.
+Look at `work/<name>.t.templates-check.png`. Every card should be on its word and readable, with the face and mouth clear, nothing under the captions, and no line wrapping where it shouldn't. Fix the card file and render again (`--overwrite`). Captions go on last, with `--hide-during "<full-screen windows>"`. Step 7 of `video-editor/references/auto-edit.md` gives their style and position.

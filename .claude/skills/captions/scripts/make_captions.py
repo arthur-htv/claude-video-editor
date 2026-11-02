@@ -375,6 +375,11 @@ def hide_during(chunks: list[dict], spec: str, min_len: float = 0.25) -> list[di
     return out
 
 
+def named_y(position: str, vertical: bool) -> float:
+    """--position as a share of the height: top, middle, bottom, or a number from 0 to 1."""
+    return {"top": 0.16, "middle": 0.5, "bottom": 0.78 if vertical else 0.86}.get(position) or float(position)
+
+
 def main() -> int:
     try:
         sys.stdout.reconfigure(errors="replace")
@@ -420,6 +425,9 @@ def main() -> int:
     if args.from_plan:
         plan = json.loads(args.from_plan.read_text(encoding="utf-8"))
         plan["chunks"] = hide_during(plan["chunks"], args.hide_during)
+        if args.position != "auto":      # given when burning: it wins over the plan's saved place
+            plan["position"] = round(named_y(args.position, plan.get("height", info.height) > plan.get("width", info.width)), 3)
+            print(f"Placed at {plan['position']:.0%} of the height (--position), not where the plan had them.")
     else:
         from transcribe import load_words, transcribe_words
         if args.words:
@@ -432,10 +440,7 @@ def main() -> int:
             return 1
         from layout import analyze
         lay = analyze(video, info)
-        named = {"top": 0.16, "middle": 0.5, "bottom": 0.86 if not lay.vertical else 0.78}
-        pos = lay.caption_y if args.position == "auto" else named.get(args.position)
-        if pos is None:
-            pos = float(args.position)
+        pos = lay.caption_y if args.position == "auto" else named_y(args.position, lay.vertical)
         plan = {"source": str(video), "style": args.style, "width": info.width, "height": info.height,
                 "fps": info.fps or 30, "position": round(pos, 3), "scale": args.scale, "layout_note": lay.note,
                 "chunks": hide_during(plan_captions(words, args.style, info.fps or 30, lay.vertical,

@@ -32,12 +32,14 @@ Numbers that compare or count belong to `morph-shapes` (bar charts, rings). Sing
 
 ## Themes (one per video)
 
-| Theme | Look | Good for | Captions to pair |
-|---|---|---|---|
-| `blueprint` (default) | dark navy graph paper, glowing blue lines, handwriting, hand-drawn icons | explainers, money, business, how-tos | `--style hand` |
-| `midnight` | near-black, bold sans, teal accent | tech, polished talking heads (matches kinetic text and morph charts) | `--style reel` |
-| `paper` | warm off-white paper, ink lines, serif headlines, orange accent | education, lifestyle, story-driven | `--style reel` |
-| `apple` | black, Inter, one blue accent, dark glass panels, hairline borders | Apple-style, clean, premium, keynote, product and tech | `--style apple` |
+| Theme | Look | Good for |
+|---|---|---|
+| `blueprint` (default) | dark navy graph paper, glowing blue lines, handwriting, hand-drawn icons | explainers, money, business, how-tos |
+| `midnight` | near-black, bold sans, teal accent | tech, polished talking heads (matches kinetic text and morph charts) |
+| `paper` | warm off-white paper, ink lines, serif headlines, orange accent | education, lifestyle, story-driven |
+| `apple` | black, Inter, one blue accent, dark glass panels, hairline borders | Apple-style, clean, premium, keynote, product and tech |
+
+Each theme's file names the caption style that goes with it: the `captions` value in `themes/<theme>.json`.
 
 The user's words choose the theme ("dark", "light", "like this reel"; "Apple", "clean" or "premium" means `apple`). Without a hint, use `blueprint` for explainers and `midnight` for everything else.
 

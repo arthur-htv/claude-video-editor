@@ -14,8 +14,14 @@ Users often name the effects they want in a word or two, so map their words to s
 | The user says (any wording) | Run |
 |---|---|
 | **auto**, auto edit, do everything, full edit, make it engaging, add effects, "edit it for me" | the automatic edit: follow `references/auto-edit.md` (also `/video-editor:auto`). It scans each video and picks every effect below by itself. |
+| continue, resume, carry on, "pick up where we left off", "where were we", "finish the edit" | the automatic edit's run file: `PY S/run_state.py <name> next` prints the step to carry on from, with `V` and `W`. Then follow `references/auto-edit.md` from that step. |
 | dead air, silences, pauses, tighten, jump cuts | dead-air cut (this skill, below) |
 | mistakes, retakes, stutters, flubs, repeats | `cut-mistakes` (step 4 of `references/auto-edit.md` shows the local commands) |
+| re-listen, check the cuts / joins, "did it cut off a word", clipped or missing words after cutting | `scripts/relisten.py` (step 4b of `references/auto-edit.md`): hears every join again with `large-v3`, compares it with the uncut video, and lists any word the cut goes through, leaves part of, or adds |
+| louder, volume, too quiet, loudness, normalize, even out the audio, LUFS, voice only in one ear / one side | voice level: `scripts/voice_level.py` (step 4c of `references/auto-edit.md`; the volume recipe in `references/editing-recipes.md` section 4) |
+| punch-in, punch-ins, zoom in on the cuts, push in, hide the jump cuts, "no zooms" | punch-ins on the jump cuts: step 4d of `references/auto-edit.md` (`PY S/punch_in.py`). "no zooms" or "keep it natural" turns them off |
+| put back a cut, undo a cut, cut more, "cut that part too", make it tighter or gentler after the graphics | change the cut, then `retime.py` moves every plan onto it: "Changing the cut after the plans" at the end of `references/auto-edit.md` |
+| check the graphics, QA, safe zones, "does anything cover my face", "will Instagram / TikTok cover it" | the graphics check: `scripts/qa_graphics.py <name>` (step 8 of `references/auto-edit.md`). Add `--platform reels`, `tiktok` or `shorts` only when the user says the video is an ad on that app, to keep graphics and captions out of the app's own buttons and text on vertical video |
 | pop, emphasis, highlights, kinetic, text effects, typing, key words | `kinetic-text` |
 | chart, graph, stats, numbers, morph, shapes, check / X, visualize | `morph-shapes` |
 | captions, subtitles, subs, words on screen, srt | `captions` |
@@ -30,12 +36,15 @@ Users often name the effects they want in a word or two, so map their words to s
 Whatever the user picks runs in this fixed order. Each step writes to `work/`, and only the last writes to `output/`:
 
 1. dead air
-2. mistakes
-3. templates, designed cards, morph graphics and kinetic text: direct them in one plan (`talking-head-recut`), templates and cards first, then the charts, then kinetic text kept clear of all of them
-4. sound effects on the graphics (`sound-effects`)
-5. captions, always last
+2. mistakes, then a re-listen of every join (`scripts/relisten.py`)
+3. voice level: one fixed gain to -14 LUFS, peaks at or under -2 dBTP (`scripts/voice_level.py`)
+4. punch-ins on the jump cuts (short and medium videos; skipped for "keep it natural" or "no zooms")
+5. templates, designed cards, morph graphics and kinetic text: direct them in one plan (`talking-head-recut`), templates and cards first, then the charts, then kinetic text kept clear of all of them
+6. sound effects on the graphics (`sound-effects`)
+7. captions, always last
+8. the graphics check (`scripts/qa_graphics.py`), then one fresh look
 
-Captions go last so their timing matches the final cut and they sit on top. When graphics are in the video, pass their time windows to `--hide-during` so captions don't cover them. Dead air is cut first by default because it's this folder's main job; skip it when the user says the video is already edited.
+Captions go last so their timing matches the final cut and they sit on top. When graphics are in the video, pass their time windows to `--hide-during` so captions don't cover them (in an automatic edit, `PY S/run_state.py <name> hide-string` builds them). Dead air is cut first by default because it's this folder's main job; skip it when the user says the video is already edited.
 
 Examples:
 - "captions and highlights" → dead air → kinetic text → captions
